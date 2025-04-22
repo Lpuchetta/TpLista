@@ -26,7 +26,9 @@ type Lista[T any] interface {
 	// Largo devuelve la longiud de la lista
 	Largo() int
 
-	// Iterar
+	// Iterar permite recorrer la lista con una funcion
 	Iterar(visitar func(T) bool)
+
+	// Iterador devuelve un iterador para recorrer la lista
 	Iterador() IteradorLista[T]
 }
