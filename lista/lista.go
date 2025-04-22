@@ -2,33 +2,56 @@ package lista
 
 type Lista[T any] interface {
 
-	// EstaVacia revisa si la lista esta vacia y devuelve un booleano
+	// EstaVacia devuelve true si la lista no contiene elementos.
 	EstaVacia() bool
 
-	// InsertarPrimero inserta un elemento en la primer posicion
+	// InsertarPrimero inserta un elemento en la primera posición.
 	InsertarPrimero(T)
 
-	// InsertarUltimo inserta un elemento en la ultima posicion
+	// InsertarUltimo inserta un elemento en la última posición.
 	InsertarUltimo(T)
 
-	// BorrarPrimero borra el primer elemento de la lista
-	// Si la lista esta se devuelve un panic "La lista esta vacia
+	// BorrarPrimero elimina el primer elemento de la lista y lo devuelve.
+	// Si la lista está vacía, lanza un panic: "La lista esta vacia".
 	BorrarPrimero() T
 
 	// VerPrimero ve el primer elemento de la lista y lo devuelve
-	// Si la lista esta se devuelve un panic "La lista esta vacia
+	// Si la lista esta vacia, lanza un panic: "La lista esta vacia".
 	VerPrimero() T
 
-	// VerUltimo ve el ultimo elemento de la lista y lo devuelve
-	// Si la lista esta se devuelve un panic "La lista esta vacia
+	// VerPrimero devuelve el primer elemento de la lista sin eliminarlo.
+	// Si la lista está vacía, lanza un panic: "La lista esta vacia".
 	VerUltimo() T
 
-	// Largo devuelve la longiud de la lista
+	// Largo devuelve la cantidad de elementos en la lista.
 	Largo() int
 
-	// Iterar permite recorrer la lista con una funcion
+	// Iterar recorre la lista desde el primero al ultimo elemento.
+	// llamado a la funcion visitar por cada uno. Si visitar devuelve false, se corta la iteracion.
 	Iterar(visitar func(T) bool)
 
-	// Iterador devuelve un iterador para recorrer la lista
+	// Iterador devuelve un iterador para recorrer la lista.
 	Iterador() IteradorLista[T]
+}
+
+type  IteradorLista[T any] interface {
+
+	// VerActual devuelve el elemento actual sobre el que está parado el iterador.
+	// Si el iterador ya recorrió toda la lista, lanza un panic: "El iterador termino de iterar".
+	VerActual() T
+
+	
+    // HaySiguiente devuelve true si quedan elementos por recorrer.
+	HaySiguiente() bool
+
+	// Siguiente avanza una posición en la lista.
+	// Si el iterador ya recorrió toda la lista, lanza un panic: "El iterador terminó de iterar".
+	Siguiente()
+
+	// Insertar agrega un elemento en la posición actual del iterador.
+	Insertar(T)
+
+	// Borrar elimina el elemento actual de la lista y lo devuelve.
+	// Si el iterador ya recorrió toda la lista, lanza un panic: "El iterador terminó de iterar".
+	Borrar() T
 }
