@@ -12,7 +12,7 @@ type listaEnlazada[T any] struct { // Creo que acá debería ir con minúscula p
 }
 
 func CrearListaEnlazada[T any]() Lista[T] { // Esto debe devolver la interfaz
-	return &ListaEnlazada[T]{
+	return &listaEnlazada[T]{
 		primero: nil,
 		ultimo:  nil,
 		largo:   0,
