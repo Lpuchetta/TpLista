@@ -24,7 +24,7 @@ func crearNuevoNodoLista[T any](dato T) *NodoLista[T] {
 	}
 }
 
-func CrearListaEnlazada[T any]() Lista[T] { // Esto debe devolver la interfaz
+func CrearListaEnlazada[T any]() Lista[T] {
 	return &listaEnlazada[T]{
 		primero: nil,
 		ultimo:  nil,
@@ -45,10 +45,7 @@ func (lista *listaEnlazada[T]) EstaVacia() bool {
 }
 
 func (lista *listaEnlazada[T]) InsertarPrimero(dato T) {
-	nuevo := &NodoLista[T]{
-		dato:    dato,
-		proximo: lista.primero,
-	}
+	nuevo := crearNuevoNodoLista(dato)
 	if lista.EstaVacia() {
 		lista.ultimo = nuevo
 	}
@@ -57,7 +54,14 @@ func (lista *listaEnlazada[T]) InsertarPrimero(dato T) {
 }
 
 func (lista *listaEnlazada[T]) InsertarUltimo(dato T) {
-
+	nuevo := crearNuevoNodoLista(dato)
+	if lista.primero == nil {
+		lista.primero = nuevo
+	} else {
+		lista.ultimo.proximo = nuevo
+	}
+	lista.ultimo = nuevo
+	lista.largo++
 }
 
 func (lista *listaEnlazada[T]) BorrarPrimero() T {
