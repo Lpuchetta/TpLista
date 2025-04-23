@@ -17,6 +17,12 @@ type iteradorListaEnlazada[T any] struct{
 	lista *listaEnlazada[T]
 }
 
+func crearNuevoNodoLista[T any](dato T) *NodoLista[T]{
+	return &NodoLista[T]{
+		proximo : nil,
+		dato : dato,
+	}
+}
 
 func CrearListaEnlazada[T any]() Lista[T] { // Esto debe devolver la interfaz
 	return &listaEnlazada[T]{
@@ -97,10 +103,44 @@ func (it *iteradorListaEnlazada[T]) Siguiente(){
 	it.actual = it.actual.proximo
 }
 
-func (it *iteradorListaEnlazada[T]) Insertar(T) {
-	
+func (it *iteradorListaEnlazada[T]) Insertar(dato T) {
+	nuevoNodo := crearNuevoNodoLista[T](dato)
+
+	if it.anterior == nil{
+		it.lista.primero = nuevoNodo
+	} else {
+		it.anterior.proximo = nuevoNodo
+	}
+
+	if it.actual == nil {
+		it.lista.ultimo = nuevoNodo
+	}
+
+	it.anterior = nuevoNodo
+
+	if it.lista.primero == nuevoNodo{
+		it.lista.ultimo = nuevoNodo //Revisar esto si esta bien, me genera dudas
+	}
+
+	it.lista.largo++
 }
 
 func (it *iteradorListaEnlazada[T]) Borrar() T{
-	
-}
+	if !it.HaySiguiente(){
+		panic("EL iterador termino de iterar")
+	}	
+	nodoBorrado := it.actual.dato
+
+	if it.anterior == nil{
+		it.lista.primero = it.actual.proximo
+	} else{
+		it.anterior.proximo = it.actual.proximo
+	}
+	if it.actual == nil{
+		it.lista.ultimo = it.anterior
+	}
+
+	it.actual = it.actual.proximo
+	it.lista.largo--	
+	return nodoBorrado
+}	
