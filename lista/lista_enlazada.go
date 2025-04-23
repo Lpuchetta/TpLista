@@ -5,26 +5,26 @@ type NodoLista[T any] struct {
 	dato    T
 }
 
-type listaEnlazada[T any] struct { // Creo que acá debería ir con minúscula para que no sea expor.
+type listaEnlazada[T any] struct {
 	primero *NodoLista[T]
 	ultimo  *NodoLista[T]
 	largo   int
 }
 
-type iteradorListaEnlazada[T any] struct{
-	actual *NodoLista[T]
+type iteradorListaEnlazada[T any] struct {
+	actual   *NodoLista[T]
 	anterior *NodoLista[T]
-	lista *listaEnlazada[T]
+	lista    *listaEnlazada[T]
 }
 
-func crearNuevoNodoLista[T any](dato T) *NodoLista[T]{
+func crearNuevoNodoLista[T any](dato T) *NodoLista[T] {
 	return &NodoLista[T]{
-		proximo : nil,
-		dato : dato,
+		proximo: nil,
+		dato:    dato,
 	}
 }
 
-func CrearListaEnlazada[T any]() Lista[T] { // Esto debe devolver la interfaz
+func CrearListaEnlazada[T any]() Lista[T] {
 	return &listaEnlazada[T]{
 		primero: nil,
 		ultimo:  nil,
@@ -32,30 +32,49 @@ func CrearListaEnlazada[T any]() Lista[T] { // Esto debe devolver la interfaz
 	}
 }
 
-func (l *listaEnlazada[T]) Iterador() IteradorLista[T]{
+func (l *listaEnlazada[T]) Iterador() IteradorLista[T] {
 	return &iteradorListaEnlazada[T]{
-		actual : l.primero,
-		anterior : nil,
-		lista : l,
+		actual:   l.primero,
+		anterior: nil,
+		lista:    l,
 	}
 }
-
- 
 
 func (lista *listaEnlazada[T]) EstaVacia() bool {
 	return lista.primero == nil && lista.ultimo == nil
 }
 
 func (lista *listaEnlazada[T]) InsertarPrimero(dato T) {
-
+	nuevo := crearNuevoNodoLista(dato)
+	if lista.EstaVacia() {
+		lista.ultimo = nuevo
+	}
+	lista.primero = nuevo
+	lista.largo++
 }
 
 func (lista *listaEnlazada[T]) InsertarUltimo(dato T) {
-
+	nuevo := crearNuevoNodoLista(dato)
+	if lista.primero == nil {
+		lista.primero = nuevo
+	} else {
+		lista.ultimo.proximo = nuevo
+	}
+	lista.ultimo = nuevo
+	lista.largo++
 }
 
 func (lista *listaEnlazada[T]) BorrarPrimero() T {
-
+	if lista.EstaVacia() {
+		panic("La lista esta vacia")
+	}
+	dato := lista.primero.dato
+	lista.primero = lista.primero.proximo
+	if lista.primero == nil {
+		lista.ultimo = nil
+	}
+	lista.largo--
+	return dato
 }
 
 func (lista *listaEnlazada[T]) VerPrimero() T {
@@ -78,25 +97,25 @@ func (lista *listaEnlazada[T]) Largo() int {
 
 func (lista *listaEnlazada[T]) Iterar(visitar func(T) bool) {
 	for actual := lista.primero; actual != nil; actual = actual.proximo {
-		if !visitar(actual.dato){
+		if !visitar(actual.dato) {
 			break
 		}
 	}
 }
 
-func (it *iteradorListaEnlazada[T]) HaySiguiente() bool{
+func (it *iteradorListaEnlazada[T]) HaySiguiente() bool {
 	return it.actual != nil
 }
 
 func (it *iteradorListaEnlazada[T]) VerActual() T {
-	if !it.HaySiguiente(){
+	if !it.HaySiguiente() {
 		panic("El iterador termino de iterar")
 	}
 	return it.actual.dato
 }
 
-func (it *iteradorListaEnlazada[T]) Siguiente(){
-	if !it.HaySiguiente(){
+func (it *iteradorListaEnlazada[T]) Siguiente() {
+	if !it.HaySiguiente() {
 		panic("El iterador termino de iterar")
 	}
 	it.anterior = it.actual
@@ -106,7 +125,7 @@ func (it *iteradorListaEnlazada[T]) Siguiente(){
 func (it *iteradorListaEnlazada[T]) Insertar(dato T) {
 	nuevoNodo := crearNuevoNodoLista[T](dato)
 
-	if it.anterior == nil{
+	if it.anterior == nil {
 		it.lista.primero = nuevoNodo
 	} else {
 		it.anterior.proximo = nuevoNodo
@@ -118,29 +137,29 @@ func (it *iteradorListaEnlazada[T]) Insertar(dato T) {
 
 	it.anterior = nuevoNodo
 
-	if it.lista.primero == nuevoNodo{
+	if it.lista.primero == nuevoNodo {
 		it.lista.ultimo = nuevoNodo //Revisar esto si esta bien, me genera dudas
 	}
 
 	it.lista.largo++
 }
 
-func (it *iteradorListaEnlazada[T]) Borrar() T{
-	if !it.HaySiguiente(){
+func (it *iteradorListaEnlazada[T]) Borrar() T {
+	if !it.HaySiguiente() {
 		panic("EL iterador termino de iterar")
-	}	
+	}
 	nodoBorrado := it.actual.dato
 
-	if it.anterior == nil{
+	if it.anterior == nil {
 		it.lista.primero = it.actual.proximo
-	} else{
+	} else {
 		it.anterior.proximo = it.actual.proximo
 	}
-	if it.actual == nil{
+	if it.actual == nil {
 		it.lista.ultimo = it.anterior
 	}
 
 	it.actual = it.actual.proximo
-	it.lista.largo--	
+	it.lista.largo--
 	return nodoBorrado
-}	
+}
