@@ -45,13 +45,13 @@ type  IteradorLista[T any] interface {
 	HaySiguiente() bool
 
 	// Siguiente avanza una posición en la lista.
-	// Si el iterador ya recorrió toda la lista, lanza un panic: "El iterador terminó de iterar".
+	// Si el iterador ya recorrió toda la lista, lanza un panic: "El iterador termino de iterar".
 	Siguiente()
 
 	// Insertar agrega un elemento en la posición actual del iterador.
 	Insertar(T)
 
 	// Borrar elimina el elemento actual de la lista y lo devuelve.
-	// Si el iterador ya recorrió toda la lista, lanza un panic: "El iterador terminó de iterar".
+	// Si el iterador ya recorrió toda la lista, lanza un panic: "El iterador termino de iterar".
 	Borrar() T
 }

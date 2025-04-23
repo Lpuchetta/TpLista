@@ -11,6 +11,13 @@ type listaEnlazada[T any] struct { // Creo que acá debería ir con minúscula p
 	largo   int
 }
 
+type iteradorListaEnlazada[T any] struct{
+	actual *NodoLista[T]
+	anterior *NodoLista[T]
+	lista *listaEnlazada[T]
+}
+
+
 func CrearListaEnlazada[T any]() Lista[T] { // Esto debe devolver la interfaz
 	return &listaEnlazada[T]{
 		primero: nil,
@@ -18,6 +25,16 @@ func CrearListaEnlazada[T any]() Lista[T] { // Esto debe devolver la interfaz
 		largo:   0,
 	}
 }
+
+func (l *listaEnlazada[T]) Iterador() IteradorLista[T]{
+	return &iteradorListaEnlazada[T]{
+		actual : l.primero,
+		anterior : nil,
+		lista : l,
+	}
+}
+
+ 
 
 func (lista *listaEnlazada[T]) EstaVacia() bool {
 	return lista.primero == nil && lista.ultimo == nil
@@ -54,15 +71,36 @@ func (lista *listaEnlazada[T]) Largo() int {
 }
 
 func (lista *listaEnlazada[T]) Iterar(visitar func(T) bool) {
-	act := lista.primero
-	for act != nil {
-		if !visitar(act.dato) {
-			return
+	for actual := lista.primero; actual != nil; actual = actual.proximo {
+		if !visitar(actual.dato){
+			break
 		}
-		act = act.proximo
 	}
 }
 
-func (lista *listaEnlazada[T]) Iterador() IteradorLista[T] {
+func (it *iteradorListaEnlazada[T]) HaySiguiente() bool{
+	return it.actual != nil
+}
 
+func (it *iteradorListaEnlazada[T]) VerActual() T {
+	if !it.HaySiguiente(){
+		panic("El iterador termino de iterar")
+	}
+	return it.actual.dato
+}
+
+func (it *iteradorListaEnlazada[T]) Siguiente(){
+	if !it.HaySiguiente(){
+		panic("El iterador termino de iterar")
+	}
+	it.anterior = it.actual
+	it.actual = it.actual.proximo
+}
+
+func (it *iteradorListaEnlazada[T]) Insertar(T) {
+	
+}
+
+func (it *iteradorListaEnlazada[T]) Borrar() T{
+	
 }
