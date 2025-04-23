@@ -41,13 +41,15 @@ func (l *listaEnlazada[T]) Iterador() IteradorLista[T] {
 }
 
 func (lista *listaEnlazada[T]) EstaVacia() bool {
-	return lista.primero == nil && lista.ultimo == nil
+	return lista.primero == nil
 }
 
 func (lista *listaEnlazada[T]) InsertarPrimero(dato T) {
 	nuevo := crearNuevoNodoLista[T](dato)
 	if lista.EstaVacia() {
 		lista.ultimo = nuevo
+	} else {
+		nuevo.proximo = lista.primero // Agrego esto para que el primer nodo no se pierda
 	}
 	lista.primero = nuevo
 	lista.largo++
