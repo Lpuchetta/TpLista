@@ -135,12 +135,7 @@ func (it *iteradorListaEnlazada[T]) Insertar(dato T) {
 		it.lista.ultimo = nuevoNodo
 	}
 
-	it.anterior = nuevoNodo
-
-	if it.lista.primero == nuevoNodo {
-		it.lista.ultimo = nuevoNodo //Revisar esto si esta bien, me genera dudas
-	}
-
+	it.actual = nuevoNodo
 	it.lista.largo++
 }
 
@@ -148,18 +143,21 @@ func (it *iteradorListaEnlazada[T]) Borrar() T {
 	if !it.HaySiguiente() {
 		panic("EL iterador termino de iterar")
 	}
-	nodoBorrado := it.actual.dato
+	datoBorrado := it.actual.dato // Creo que queda mejor indicar que devolvemos un dato y no el nodo.
+
+	proximo := it.actual.proximo // Me guardo la ref al próximo para estar más cómodo.
 
 	if it.anterior == nil {
-		it.lista.primero = it.actual.proximo
+		it.lista.primero = proximo
 	} else {
-		it.anterior.proximo = it.actual.proximo
+		it.anterior.proximo = proximo
 	}
-	if it.actual == nil {
+
+	if proximo == nil {
 		it.lista.ultimo = it.anterior
 	}
 
-	it.actual = it.actual.proximo
+	it.actual = proximo
 	it.lista.largo--
-	return nodoBorrado
+	return datoBorrado
 }
