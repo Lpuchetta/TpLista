@@ -19,28 +19,78 @@ func TestListaVacia(t *testing.T) {
 		lista.VerUltimo()
 	})
 	require.True(t, lista.EstaVacia())
+	require.Equal(t, 0, lista.Largo())
 }
 
 func TestInsertarPrimeroInsertarUltimo(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
-	require.True(t, lista.EstaVacia())
-	lista.InsertarPrimero(2)
-	require.Equal(t, 2, lista.VerPrimero())
-	lista.InsertarUltimo(21)
-	require.Equal(t, 21, lista.VerUltimo())
+	lista.InsertarPrimero(5)
+	require.Equal(t, 5, lista.VerPrimero())
+	require.False(t, lista.EstaVacia())
+	require.Equal(t, 1, lista.Largo())
+
+	lista.InsertarPrimero(4)
+	require.Equal(t, 4, lista.VerPrimero())
+	require.Equal(t, 5, lista.VerUltimo())
 	require.False(t, lista.EstaVacia())
 	require.Equal(t, 2, lista.Largo())
 
-	require.Equal(t, 2, lista.BorrarPrimero())
-	require.Equal(t, 21, lista.VerPrimero())
+	lista.InsertarPrimero(3)
+	require.Equal(t, 3, lista.VerPrimero())
+	require.Equal(t, 5, lista.VerUltimo())
 	require.False(t, lista.EstaVacia())
+	require.Equal(t, 3, lista.Largo())
 
-	lista.InsertarUltimo(2)
-	require.Equal(t, 2, lista.VerUltimo())
-	require.Equal(t, 21, lista.VerPrimero())
+	lista.InsertarUltimo(6)
+	require.Equal(t, 6, lista.VerUltimo())
+	require.Equal(t, 3, lista.VerPrimero())
 	require.False(t, lista.EstaVacia())
-		
+	require.Equal(t, 4, lista.Largo())
+
+	lista.InsertarUltimo(7)	
+	require.Equal(t, 7, lista.VerUltimo())
+	require.Equal(t, 3, lista.VerPrimero())
+	require.False(t, lista.EstaVacia())
+	require.Equal(t, 5, lista.Largo())
+
+	require.Equal(t, 3, lista.BorrarPrimero())
+	require.Equal(t, 4, lista.VerPrimero())
+	require.Equal(t, 7, lista.VerUltimo())
+	require.False(t, lista.EstaVacia())
+	require.Equal(t, 4, lista.Largo())
+	
+	require.Equal(t, 4, lista.BorrarPrimero())
+	require.Equal(t, 5, lista.VerPrimero())
+	require.Equal(t, 7, lista.VerUltimo())
+	require.False(t, lista.EstaVacia())
+	require.Equal(t, 3, lista.Largo())
+	
+	require.Equal(t, 5, lista.BorrarPrimero())
+	require.Equal(t, 6, lista.VerPrimero())
+	require.Equal(t, 7, lista.VerUltimo())
+	require.False(t, lista.EstaVacia())
+	require.Equal(t, 2, lista.Largo())
+
+	require.Equal(t, 6, lista.BorrarPrimero())
+	require.Equal(t, 7, lista.VerPrimero())
+	require.Equal(t, 7, lista.VerUltimo())
+	require.False(t, lista.EstaVacia())
+	require.Equal(t, 1, lista.Largo())
+
+	require.Equal(t, 7, lista.BorrarPrimero())
+	require.True(t, lista.EstaVacia())
+	require.Equal(t, 0, lista.Largo())
+	
+	require.PanicsWithValue(t, "La lista esta vacia", func(){
+		lista.VerPrimero()
+	})
+	require.PanicsWithValue(t, "La lista esta vacia", func(){
+		lista.VerUltimo()
+	})
+	require.PanicsWithValue(t, "La lista esta vacia", func(){
+		lista.BorrarPrimero()
+	})
 }
 
 
