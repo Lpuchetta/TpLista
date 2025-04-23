@@ -45,7 +45,7 @@ func (lista *listaEnlazada[T]) EstaVacia() bool {
 }
 
 func (lista *listaEnlazada[T]) InsertarPrimero(dato T) {
-	nuevo := crearNuevoNodoLista(dato)
+	nuevo := crearNuevoNodoLista[T](dato)
 	if lista.EstaVacia() {
 		lista.ultimo = nuevo
 	}
@@ -54,7 +54,7 @@ func (lista *listaEnlazada[T]) InsertarPrimero(dato T) {
 }
 
 func (lista *listaEnlazada[T]) InsertarUltimo(dato T) {
-	nuevo := crearNuevoNodoLista(dato)
+	nuevo := crearNuevoNodoLista[T](dato)
 	if lista.primero == nil {
 		lista.primero = nuevo
 	} else {
