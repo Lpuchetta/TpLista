@@ -17,6 +17,12 @@ type iteradorListaEnlazada[T any] struct{
 	lista *listaEnlazada[T]
 }
 
+func crearNuevoNodoLista[T any](dato T) *NodoLista[T]{
+	return &NodoLista[T]{
+		proximo : nil,
+		dato : dato,
+	}
+}
 
 func CrearListaEnlazada[T any]() Lista[T] { // Esto debe devolver la interfaz
 	return &listaEnlazada[T]{
@@ -97,8 +103,20 @@ func (it *iteradorListaEnlazada[T]) Siguiente(){
 	it.actual = it.actual.proximo
 }
 
-func (it *iteradorListaEnlazada[T]) Insertar(T) {
-	
+func (it *iteradorListaEnlazada[T]) Insertar(dato T) {
+	nuevoNodo := crearNuevoNodoLista[T](dato)
+
+	if it.anterior == nil{
+		it.lista.primero = nuevoNodo
+	} else {
+		it.anterior.proximo = nuevoNodo
+	}
+
+	if it.actual == nil {
+		it.lista.ultimo = nuevoNodo
+	}
+	it.anterior = nuevoNodo
+	it.lista.largo++
 }
 
 func (it *iteradorListaEnlazada[T]) Borrar() T{
