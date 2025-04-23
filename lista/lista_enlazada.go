@@ -135,12 +135,7 @@ func (it *iteradorListaEnlazada[T]) Insertar(dato T) {
 		it.lista.ultimo = nuevoNodo
 	}
 
-	it.anterior = nuevoNodo
-
-	if it.lista.primero == nuevoNodo {
-		it.lista.ultimo = nuevoNodo //Revisar esto si esta bien, me genera dudas
-	}
-
+	it.actual = nuevoNodo
 	it.lista.largo++
 }
 
