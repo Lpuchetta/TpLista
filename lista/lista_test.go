@@ -93,5 +93,48 @@ func TestInsertarPrimeroInsertarUltimo(t *testing.T) {
 	})
 }
 
-
-
+func TestVolumen(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+	n := 10000
+	for i := 0; i < n/2; i++{
+		lista.InsertarPrimero(i)
+		require.Equal(t, i, lista.VerPrimero())
+		require.False(t, lista.EstaVacia())
+		require.Equal(t, i + 1, lista.Largo())
+	} 
+	for i := n / 2; i < n; i++{
+		lista.InsertarUltimo(i)
+		require.Equal(t, i, lista.VerUltimo())
+		require.False(t, lista.EstaVacia())
+		require.Equal(t, i + 1, lista.Largo())
+	}
+	require.Equal(t, n, lista.Largo())
+	largoEsperado := n
+	for i := n / 2 - 1; i >= 0; i-- {
+		require.Equal(t, i, lista.BorrarPrimero())
+		largoEsperado--
+		require.Equal(t, largoEsperado , lista.Largo())
+		require.False(t, lista.EstaVacia())
+		require.Equal(t, n - 1, lista.VerUltimo())
+	}
+	for i := n / 2; i < n ; i++{
+		require.Equal(t, i, lista.BorrarPrimero())
+		largoEsperado--
+		require.Equal(t,largoEsperado,lista.Largo())
+		if largoEsperado > 0{
+			require.False(t, lista.EstaVacia())
+			require.Equal(t, n-1, lista.VerUltimo())
+		}
+	}
+	require.True(t, lista.EstaVacia())
+	require.Equal(t, 0, lista.Largo())
+	require.PanicsWithValue(t, "La lista esta vacia", func() {
+		lista.VerPrimero()
+	})
+	require.PanicsWithValue(t, "La lista esta vacia", func() {
+		lista.VerUltimo()
+	})
+	require.PanicsWithValue(t, "La lista esta vacia", func(){
+		lista.BorrarPrimero()
+	})
+}
