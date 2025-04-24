@@ -194,3 +194,85 @@ func TestCasosBordes(t *testing.T) {
 	require.Equal(t, 7, lista.BorrarPrimero())
 	require.Equal(t, 7, lista.BorrarPrimero())	
 }
+
+func TestDiferentesTiposDeDatos(t *testing.T) {
+	listaStr := TDALista.CrearListaEnlazada[string]()
+
+	require.True(t, listaStr.EstaVacia())
+	require.PanicsWithValue(t, "La lista esta vacia", func(){
+		listaStr.VerPrimero()
+	})
+	require.PanicsWithValue(t, "La lista esta vacia", func(){
+		listaStr.VerUltimo()
+	})
+	require.PanicsWithValue(t, "La lista esta vacia", func(){
+		listaStr.BorrarPrimero()
+	})
+	require.Equal(t, 0, listaStr.Largo())
+	listaStr.InsertarPrimero("A")
+	require.Equal(t, 1, listaStr.Largo())
+	require.False(t, listaStr.EstaVacia())
+	require.Equal(t, "A", listaStr.VerPrimero())
+	require.Equal(t, "A", listaStr.VerUltimo())
+	listaStr.InsertarUltimo("B")
+	require.Equal(t, "B", listaStr.VerUltimo())
+	require.Equal(t, "A", listaStr.VerPrimero())
+	require.Equal(t, 2, listaStr.Largo())
+	require.False(t, listaStr.EstaVacia())
+	require.Equal(t, "A", listaStr.BorrarPrimero())
+	require.Equal(t, "B", listaStr.BorrarPrimero())
+	require.True(t, listaStr.EstaVacia())
+
+	listaBool := TDALista.CrearListaEnlazada[bool]()
+	require.True(t, listaBool.EstaVacia())
+	require.PanicsWithValue(t, "La lista esta vacia", func() {
+		listaBool.VerPrimero()
+	})
+	require.PanicsWithValue(t, "La lista esta vacia", func(){
+		listaBool.VerUltimo()
+	})
+	require.PanicsWithValue(t, "La lista esta vacia", func(){
+		listaBool.BorrarPrimero()
+	})
+	require.Equal(t, 0, listaBool.Largo())
+	listaBool.InsertarPrimero(true)
+	listaBool.InsertarUltimo(false)
+	require.Equal(t, true, listaBool.VerPrimero())
+	require.Equal(t, false, listaBool.VerUltimo())
+	require.Equal(t, 2, listaBool.Largo())
+	require.False(t, listaBool.EstaVacia())
+	require.Equal(t, true, listaBool.BorrarPrimero())
+	require.Equal(t, false, listaBool.BorrarPrimero())
+	require.True(t, listaBool.EstaVacia())
+
+	type Persona struct{
+		Nombre string
+		Edad int
+	}
+	listaPersona := TDALista.CrearListaEnlazada[Persona]()
+	require.PanicsWithValue(t, "La lista esta vacia", func(){
+		listaPersona.VerPrimero()
+	})
+	require.PanicsWithValue(t, "La lista esta vacia", func(){
+		listaPersona.VerUltimo()
+	})
+	require.PanicsWithValue(t, "La lista esta vacia", func(){
+		listaPersona.BorrarPrimero()
+	})
+	require.True(t, listaPersona.EstaVacia())
+	require.Equal(t, 0, listaPersona.Largo())
+
+	p1 := Persona{Nombre: "Alan", Edad: 58}
+	p2 := Persona{Nombre: "Barbara", Edad: 12}
+	listaPersona.InsertarPrimero(p1)
+	listaPersona.InsertarUltimo(p2)
+	require.False(t, listaPersona.EstaVacia())
+	require.Equal(t, 2, listaPersona.Largo())
+	require.Equal(t, p1, listaPersona.VerPrimero())
+	require.Equal(t, p2, listaPersona.VerUltimo())
+	require.Equal(t, p1, listaPersona.BorrarPrimero())
+	require.Equal(t, p2, listaPersona.BorrarPrimero())
+	require.True(t, listaPersona.EstaVacia())
+	require.Equal(t, 0, listaPersona.Largo())
+	
+}
