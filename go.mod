@@ -1,4 +1,4 @@
-module tp1
+module tdas
 
 go 1.24.1
 
