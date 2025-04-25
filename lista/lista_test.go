@@ -504,3 +504,98 @@ func TestIteradorBorrarElementoDelMedio(t *testing.T) {
 	require.True(t, it.HaySiguiente())
 
 }
+
+func TestIteradorInternoSumaElementos(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	lista.InsertarUltimo(1)
+	lista.InsertarUltimo(2)
+	lista.InsertarUltimo(3)
+	lista.InsertarUltimo(4)
+
+	suma := 0
+	lista.Iterar(func(dato int) bool {
+		suma += dato
+		return true
+	})
+
+	require.Equal(t, 10, suma)
+
+}
+
+func TestIteradorInternoSumaParcialElementos(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	lista.InsertarUltimo(1)
+	lista.InsertarUltimo(2)
+	lista.InsertarUltimo(3)
+	lista.InsertarUltimo(4)
+	lista.InsertarUltimo(5)
+	lista.InsertarUltimo(6)
+
+	suma := 0
+	lista.Iterar(func(dato int) bool {
+		if suma <= 10 {
+			suma += dato
+			return true
+		}
+		return false
+	})
+
+	require.Equal(t, 15, suma)
+
+}
+
+func TestIteradorInternoSumarPares(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	lista.InsertarUltimo(1)
+	lista.InsertarUltimo(2)
+	lista.InsertarUltimo(3)
+	lista.InsertarUltimo(4)
+	lista.InsertarUltimo(5)
+	lista.InsertarUltimo(6)
+
+	suma := 0
+	lista.Iterar(func(dato int) bool {
+		if dato%2 == 0 {
+			suma += dato
+		}
+		return true
+	})
+
+	require.Equal(t, 12, suma)
+
+}
+
+func TestIteradorInternoSumarLosPrimerosTresPares(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	lista.InsertarUltimo(1)
+	lista.InsertarUltimo(2)
+	lista.InsertarUltimo(3)
+	lista.InsertarUltimo(4)
+	lista.InsertarUltimo(5)
+	lista.InsertarUltimo(6)
+	lista.InsertarUltimo(7)
+	lista.InsertarUltimo(8)
+	lista.InsertarUltimo(9)
+	lista.InsertarUltimo(10)
+
+	suma, cont := 0, 0
+	lista.Iterar(func(dato int) bool {
+		if cont == 3 {
+			return false
+		}
+
+		if dato%2 == 0 {
+			suma += dato
+			cont++
+		}
+
+		return true
+	})
+
+	require.Equal(t, 12, suma)
+
+}
