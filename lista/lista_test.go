@@ -381,3 +381,45 @@ func TestIteradorInsertarVariosValores(t *testing.T) {
 	})
 
 }
+
+func TestIteradorBorraPrimero(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	lista.InsertarUltimo(1)
+	lista.InsertarUltimo(2)
+	lista.InsertarUltimo(3)
+	lista.InsertarUltimo(4)
+
+	it := lista.Iterador()
+
+	borrado := it.Borrar()
+
+	require.Equal(t, 3, lista.Largo())
+	require.Equal(t, 1, borrado)
+	require.Equal(t, 2, it.VerActual())
+	require.True(t, it.HaySiguiente())
+
+}
+
+func TestIteradorBorraUltimo(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	lista.InsertarUltimo(1)
+	lista.InsertarUltimo(2)
+	lista.InsertarUltimo(3)
+	lista.InsertarUltimo(4)
+
+	it := lista.Iterador()
+
+	for i := 0; i < 3; i++ {
+		it.Siguiente()
+	}
+
+	borrado := it.Borrar()
+
+	require.Equal(t, 4, borrado)
+	require.Equal(t, 3, lista.Largo())
+	// require.Equal(t, 3, it.VerActual())
+	require.False(t, it.HaySiguiente())
+
+}
