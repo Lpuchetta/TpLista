@@ -49,7 +49,7 @@ func (lista *listaEnlazada[T]) InsertarPrimero(dato T) {
 	if lista.EstaVacia() {
 		lista.ultimo = nuevo
 	} else {
-		nuevo.proximo = lista.primero // Agrego esto para que el primer nodo no se pierda
+		nuevo.proximo = lista.primero
 	}
 	lista.primero = nuevo
 	lista.largo++
@@ -145,7 +145,7 @@ func (it *iteradorListaEnlazada[T]) Borrar() T {
 	if !it.HaySiguiente() {
 		panic("El iterador termino de iterar")
 	}
-	datoBorrado := it.actual.dato
+	dato := it.actual.dato
 
 	proximo := it.actual.proximo
 
@@ -161,5 +161,5 @@ func (it *iteradorListaEnlazada[T]) Borrar() T {
 
 	it.actual = proximo
 	it.lista.largo--
-	return datoBorrado
+	return dato
 }
