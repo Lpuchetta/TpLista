@@ -277,7 +277,7 @@ func TestDiferentesTiposDeDatos(t *testing.T) {
 
 }
 
-func TestCrearIteradorListaVacia(t *testing.T) {
+func TestCrearIteradorExternoSobreListaVacia(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
 	it := lista.Iterador()
@@ -294,7 +294,7 @@ func TestCrearIteradorListaVacia(t *testing.T) {
 
 }
 
-func TestIteradorInsertarSobreListaVacia(t *testing.T) {
+func TestIteradorInsertaElementoSobreListaVacia(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
 	it := lista.Iterador()
@@ -323,13 +323,11 @@ func TestIteradorInsertarSobreListaVacia(t *testing.T) {
 func TestIteradorInsertaAlPrincipio(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
-	lista.InsertarPrimero(1)
-	lista.InsertarPrimero(2)
-	lista.InsertarPrimero(3)
-	lista.InsertarPrimero(4)
+	for i := 0; i < 4; i++ {
+		lista.InsertarUltimo(i)
+	}
 
 	it := lista.Iterador()
-
 	it.Insertar(467)
 
 	require.Equal(t, 5, lista.Largo())
@@ -342,14 +340,13 @@ func TestIteradorInsertaAlPrincipio(t *testing.T) {
 func TestIteradorInsertaAlFinal(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
-	lista.InsertarPrimero(1)
-	lista.InsertarPrimero(2)
-	lista.InsertarPrimero(3)
-	lista.InsertarPrimero(4)
+	for i := 0; i < 4; i++ {
+		lista.InsertarUltimo(i)
+	}
 
 	it := lista.Iterador()
-	for ; it.HaySiguiente(); it.Siguiente() {
-
+	for it.HaySiguiente() {
+		it.Siguiente()
 	}
 
 	it.Insertar(467)
@@ -364,10 +361,9 @@ func TestIteradorInsertaAlFinal(t *testing.T) {
 func TestIteradorInsertarVariosValores(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
-	lista.InsertarPrimero(1)
-	lista.InsertarPrimero(2)
-	lista.InsertarPrimero(3)
-	lista.InsertarPrimero(4)
+	for i := 0; i < 4; i++ {
+		lista.InsertarUltimo(i)
+	}
 
 	it := lista.Iterador()
 	it.Siguiente()
@@ -411,19 +407,18 @@ func TestIteradorInsertarVariosValores(t *testing.T) {
 func TestIteradorBorrarPrimero(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
-	lista.InsertarUltimo(1)
-	lista.InsertarUltimo(2)
-	lista.InsertarUltimo(3)
-	lista.InsertarUltimo(4)
+	for i := 0; i < 4; i++ {
+		lista.InsertarUltimo(i)
+	}
 
 	it := lista.Iterador()
 
 	borrado := it.Borrar()
 
 	require.Equal(t, 3, lista.Largo())
-	require.Equal(t, 2, lista.VerPrimero())
-	require.Equal(t, 1, borrado)
-	require.Equal(t, 2, it.VerActual())
+	require.Equal(t, 1, lista.VerPrimero())
+	require.Equal(t, 0, borrado)
+	require.Equal(t, 1, it.VerActual())
 	require.True(t, it.HaySiguiente())
 
 }
@@ -431,10 +426,9 @@ func TestIteradorBorrarPrimero(t *testing.T) {
 func TestIteradorBorraUltimo(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
-	lista.InsertarUltimo(1)
-	lista.InsertarUltimo(2)
-	lista.InsertarUltimo(3)
-	lista.InsertarUltimo(4)
+	for i := 0; i < 4; i++ {
+		lista.InsertarUltimo(i)
+	}
 
 	it := lista.Iterador()
 
@@ -445,8 +439,8 @@ func TestIteradorBorraUltimo(t *testing.T) {
 	borrado := it.Borrar()
 
 	require.Equal(t, 3, lista.Largo())
-	require.Equal(t, 3, lista.VerUltimo())
-	require.Equal(t, 4, borrado)
+	require.Equal(t, 2, lista.VerUltimo())
+	require.Equal(t, 3, borrado)
 	require.False(t, it.HaySiguiente())
 
 }
@@ -454,10 +448,9 @@ func TestIteradorBorraUltimo(t *testing.T) {
 func TestIteradorBorraAlTerminarDeIterarLanzaError(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
-	lista.InsertarUltimo(1)
-	lista.InsertarUltimo(2)
-	lista.InsertarUltimo(3)
-	lista.InsertarUltimo(4)
+	for i := 0; i < 4; i++ {
+		lista.InsertarUltimo(i)
+	}
 
 	it := lista.Iterador()
 
@@ -481,28 +474,22 @@ func TestIteradorBorraAlTerminarDeIterarLanzaError(t *testing.T) {
 
 }
 
-func TestIteradorBorrarElementoDelMedio(t *testing.T) {
+func TestIteradorBorrarElementoDelMedioDinamico(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
-
-	lista.InsertarUltimo(1)
-	lista.InsertarUltimo(2)
-	lista.InsertarUltimo(467)
-	lista.InsertarUltimo(3)
-	lista.InsertarUltimo(4)
+	for _, v := range []int{1, 2, 467, 3, 4} {
+		lista.InsertarUltimo(v)
+	}
 
 	it := lista.Iterador()
-
-	it.Siguiente()
-	it.Siguiente()
+	for i := 0; i < 2; i++ {
+		it.Siguiente()
+	}
 
 	borrado := it.Borrar()
-
 	require.Equal(t, 4, lista.Largo())
-
 	require.Equal(t, 467, borrado)
 	require.Equal(t, 3, it.VerActual())
 	require.True(t, it.HaySiguiente())
-
 }
 
 func TestIteradorInternoSobreListaVacia(t *testing.T) {
