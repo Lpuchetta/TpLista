@@ -474,10 +474,10 @@ func TestIteradorBorraAlTerminarDeIterarLanzaError(t *testing.T) {
 
 }
 
-func TestIteradorBorrarElementoDelMedioDinamico(t *testing.T) {
+func TestIteradorBorrarElementoDelMedio(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
-	for _, v := range []int{1, 2, 467, 3, 4} {
-		lista.InsertarUltimo(v)
+	for _, num := range []int{1, 2, 467, 3, 4} {
+		lista.InsertarUltimo(num)
 	}
 
 	it := lista.Iterador()
