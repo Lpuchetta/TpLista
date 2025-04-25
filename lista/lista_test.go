@@ -408,7 +408,7 @@ func TestIteradorInsertarVariosValores(t *testing.T) {
 
 }
 
-func TestIteradorBorraPrimero(t *testing.T) {
+func TestIteradorBorrarPrimero(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
 	lista.InsertarUltimo(1)
@@ -421,6 +421,7 @@ func TestIteradorBorraPrimero(t *testing.T) {
 	borrado := it.Borrar()
 
 	require.Equal(t, 3, lista.Largo())
+	require.Equal(t, 2, lista.VerPrimero())
 	require.Equal(t, 1, borrado)
 	require.Equal(t, 2, it.VerActual())
 	require.True(t, it.HaySiguiente())
@@ -443,9 +444,9 @@ func TestIteradorBorraUltimo(t *testing.T) {
 
 	borrado := it.Borrar()
 
-	require.Equal(t, 4, borrado)
 	require.Equal(t, 3, lista.Largo())
-	// require.Equal(t, 3, it.VerActual())
+	require.Equal(t, 3, lista.VerUltimo())
+	require.Equal(t, 4, borrado)
 	require.False(t, it.HaySiguiente())
 
 }
@@ -477,5 +478,29 @@ func TestIteradorBorraAlTerminarDeIterarLanzaError(t *testing.T) {
 	require.PanicsWithValue(t, "El iterador termino de iterar", func() {
 		it.Borrar()
 	})
+
+}
+
+func TestIteradorBorrarElementoDelMedio(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	lista.InsertarUltimo(1)
+	lista.InsertarUltimo(2)
+	lista.InsertarUltimo(467)
+	lista.InsertarUltimo(3)
+	lista.InsertarUltimo(4)
+
+	it := lista.Iterador()
+
+	it.Siguiente()
+	it.Siguiente()
+
+	borrado := it.Borrar()
+
+	require.Equal(t, 4, lista.Largo())
+
+	require.Equal(t, 467, borrado)
+	require.Equal(t, 3, it.VerActual())
+	require.True(t, it.HaySiguiente())
 
 }
