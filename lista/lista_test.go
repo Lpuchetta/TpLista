@@ -449,3 +449,33 @@ func TestIteradorBorraUltimo(t *testing.T) {
 	require.False(t, it.HaySiguiente())
 
 }
+
+func TestIteradorBorraAlTerminarDeIterarLanzaError(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	lista.InsertarUltimo(1)
+	lista.InsertarUltimo(2)
+	lista.InsertarUltimo(3)
+	lista.InsertarUltimo(4)
+
+	it := lista.Iterador()
+
+	for it.HaySiguiente() {
+		it.Siguiente()
+	}
+
+	require.False(t, it.HaySiguiente())
+
+	require.PanicsWithValue(t, "El iterador termino de iterar", func() {
+		it.VerActual()
+	})
+
+	require.PanicsWithValue(t, "El iterador termino de iterar", func() {
+		it.Siguiente()
+	})
+
+	require.PanicsWithValue(t, "El iterador termino de iterar", func() {
+		it.Borrar()
+	})
+
+}
