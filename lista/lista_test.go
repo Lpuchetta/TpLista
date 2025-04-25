@@ -294,6 +294,32 @@ func TestCrearIteradorListaVacia(t *testing.T) {
 
 }
 
+func TestIteradorInsertarSobreListaVacia(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	it := lista.Iterador()
+
+	it.Insertar(467)
+
+	require.False(t, lista.EstaVacia())
+	require.Equal(t, 467, lista.VerPrimero())
+	require.Equal(t, 467, it.VerActual())
+	require.True(t, it.HaySiguiente())
+
+	it.Siguiente()
+
+	require.False(t, it.HaySiguiente())
+
+	require.PanicsWithValue(t, "El iterador termino de iterar", func() {
+		it.VerActual()
+	})
+
+	require.PanicsWithValue(t, "El iterador termino de iterar", func() {
+		it.Siguiente()
+	})
+
+}
+
 func TestIteradorInsertaAlPrincipio(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
