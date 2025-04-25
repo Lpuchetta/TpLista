@@ -505,13 +505,22 @@ func TestIteradorBorrarElementoDelMedio(t *testing.T) {
 
 }
 
-func TestIteradorInternoSumaElementos(t *testing.T) {
+func TestIteradorInternoSobreListaVacia(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
-	lista.InsertarUltimo(1)
-	lista.InsertarUltimo(2)
-	lista.InsertarUltimo(3)
-	lista.InsertarUltimo(4)
+	cont := 0
+	lista.Iterar(func(dato int) bool {
+		cont++
+		return true
+	})
+
+	require.Equal(t, 0, cont)
+}
+
+func TestIteradorInternoSobreListaConUnSoloElemento(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	lista.InsertarPrimero(467)
 
 	suma := 0
 	lista.Iterar(func(dato int) bool {
@@ -519,19 +528,85 @@ func TestIteradorInternoSumaElementos(t *testing.T) {
 		return true
 	})
 
-	require.Equal(t, 10, suma)
+	require.Equal(t, 467, suma)
+}
+
+func TestIteradorInternoSeDetieneEnElPrimero(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	for i := 1; i <= 10; i++ {
+		lista.InsertarUltimo(i)
+	}
+
+	cont := 0
+	lista.Iterar(func(dato int) bool {
+		cont++
+		return false
+	})
+
+	require.Equal(t, 1, cont)
+}
+
+func TestIteradorInternoSeDetieneEnElTercero(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	for i := 1; i <= 10; i++ {
+		lista.InsertarUltimo(i)
+	}
+
+	cont := 0
+	lista.Iterar(func(dato int) bool {
+		if cont == 3 {
+			return false
+		}
+		cont++
+		return true
+	})
+
+	require.Equal(t, 3, cont)
+}
+
+func TestIteradorInternoVisitaTodos(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	nums := []int{467, 23, 101, 19}
+
+	for _, num := range nums {
+		lista.InsertarUltimo(num)
+	}
+
+	var vistos []int
+	lista.Iterar(func(dato int) bool {
+		vistos = append(vistos, dato)
+		return true
+	})
+
+	require.Equal(t, nums, vistos)
+}
+
+func TestIteradorInternoSumaElementos(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	for i := 1; i <= 100; i++ {
+		lista.InsertarUltimo(i)
+	}
+
+	suma := 0
+	lista.Iterar(func(dato int) bool {
+		suma += dato
+		return true
+	})
+
+	require.Equal(t, 5050, suma)
 
 }
 
 func TestIteradorInternoSumaParcialElementos(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
-	lista.InsertarUltimo(1)
-	lista.InsertarUltimo(2)
-	lista.InsertarUltimo(3)
-	lista.InsertarUltimo(4)
-	lista.InsertarUltimo(5)
-	lista.InsertarUltimo(6)
+	for i := 1; i <= 6; i++ {
+		lista.InsertarUltimo(i)
+	}
 
 	suma := 0
 	lista.Iterar(func(dato int) bool {
@@ -549,12 +624,9 @@ func TestIteradorInternoSumaParcialElementos(t *testing.T) {
 func TestIteradorInternoSumarPares(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
-	lista.InsertarUltimo(1)
-	lista.InsertarUltimo(2)
-	lista.InsertarUltimo(3)
-	lista.InsertarUltimo(4)
-	lista.InsertarUltimo(5)
-	lista.InsertarUltimo(6)
+	for i := 1; i <= 6; i++ {
+		lista.InsertarUltimo(i)
+	}
 
 	suma := 0
 	lista.Iterar(func(dato int) bool {
@@ -571,16 +643,9 @@ func TestIteradorInternoSumarPares(t *testing.T) {
 func TestIteradorInternoSumarLosPrimerosTresPares(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
-	lista.InsertarUltimo(1)
-	lista.InsertarUltimo(2)
-	lista.InsertarUltimo(3)
-	lista.InsertarUltimo(4)
-	lista.InsertarUltimo(5)
-	lista.InsertarUltimo(6)
-	lista.InsertarUltimo(7)
-	lista.InsertarUltimo(8)
-	lista.InsertarUltimo(9)
-	lista.InsertarUltimo(10)
+	for i := 1; i <= 100; i++ {
+		lista.InsertarUltimo(i)
+	}
 
 	suma, cont := 0, 0
 	lista.Iterar(func(dato int) bool {
@@ -598,4 +663,43 @@ func TestIteradorInternoSumarLosPrimerosTresPares(t *testing.T) {
 
 	require.Equal(t, 12, suma)
 
+}
+
+func TestIteradorInternoBusquedaElemento(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	nums := []int{467, 23, 101, 19}
+
+	for _, num := range nums {
+		lista.InsertarUltimo(num)
+	}
+
+	elemBuscado := 101
+	pertenece := false
+	lista.Iterar(func(dato int) bool {
+		if dato == elemBuscado {
+			pertenece = true
+			return false
+		}
+		return true
+	})
+
+	require.True(t, pertenece)
+}
+
+func TestIteradorInternoConcatenaStrings(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[string]()
+
+	lista.InsertarUltimo("Esto es")
+	lista.InsertarUltimo(" una ")
+	lista.InsertarUltimo("prueba sobre el ")
+	lista.InsertarUltimo("iterador inter")
+	lista.InsertarUltimo("no :)")
+
+	var texto string
+	lista.Iterar(func(s string) bool {
+		texto += s
+		return true
+	})
+	require.Equal(t, "Esto es una prueba sobre el iterador interno :)", texto)
 }
