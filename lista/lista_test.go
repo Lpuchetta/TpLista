@@ -665,6 +665,25 @@ func TestIteradorInternoSumarLosPrimerosTresPares(t *testing.T) {
 
 }
 
+func TestIteradorInternoContarImpares(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	for i := 0; i < 100; i++ {
+		lista.InsertarUltimo(i)
+	}
+
+	cont := 0
+	lista.Iterar(func(dato int) bool {
+		if dato%2 == 1 {
+			cont++
+		}
+		return true
+	})
+
+	require.Equal(t, 50, cont)
+
+}
+
 func TestIteradorInternoBusquedaElemento(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
