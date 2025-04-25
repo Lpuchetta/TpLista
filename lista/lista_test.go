@@ -9,6 +9,10 @@ import (
 
 func TestListaVacia(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
+
+	require.True(t, lista.EstaVacia())
+	require.Equal(t, 0, lista.Largo())
+
 	require.PanicsWithValue(t, "La lista esta vacia", func() {
 		lista.BorrarPrimero()
 	})
@@ -18,8 +22,7 @@ func TestListaVacia(t *testing.T) {
 	require.PanicsWithValue(t, "La lista esta vacia", func() {
 		lista.VerUltimo()
 	})
-	require.True(t, lista.EstaVacia())
-	require.Equal(t, 0, lista.Largo())
+
 }
 
 func TestInsertarPrimeroInsertarUltimo(t *testing.T) {
@@ -95,6 +98,7 @@ func TestInsertarPrimeroInsertarUltimo(t *testing.T) {
 
 func TestVolumen(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
+
 	n := 10000
 	for i := 0; i < n/2; i++ {
 		lista.InsertarPrimero(i)
@@ -126,8 +130,10 @@ func TestVolumen(t *testing.T) {
 			require.Equal(t, n-1, lista.VerUltimo())
 		}
 	}
+
 	require.True(t, lista.EstaVacia())
 	require.Equal(t, 0, lista.Largo())
+
 	require.PanicsWithValue(t, "La lista esta vacia", func() {
 		lista.VerPrimero()
 	})
@@ -141,8 +147,10 @@ func TestVolumen(t *testing.T) {
 
 func TestCasosBordes(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
+
 	require.True(t, lista.EstaVacia())
 	require.Equal(t, 0, lista.Largo())
+
 	require.PanicsWithValue(t, "La lista esta vacia", func() {
 		lista.VerPrimero()
 	})
@@ -171,6 +179,7 @@ func TestCasosBordes(t *testing.T) {
 	lista.InsertarPrimero(100)
 	require.Equal(t, 100, lista.BorrarPrimero())
 	require.True(t, lista.EstaVacia())
+
 	require.PanicsWithValue(t, "La lista esta vacia", func() {
 		lista.VerPrimero()
 	})
@@ -492,6 +501,75 @@ func TestIteradorBorrarElementoDelMedio(t *testing.T) {
 	require.True(t, it.HaySiguiente())
 }
 
+func TestIteradorSumarElementos(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	for i := 0; i <= 5; i++ {
+		lista.InsertarUltimo(i)
+	}
+
+	it := lista.Iterador()
+	suma := 0
+	for it.HaySiguiente() {
+		suma += it.VerActual()
+		it.Siguiente()
+	}
+
+	require.Equal(t, 15, suma)
+}
+
+func TestIteradorBuscarElementoPorCondicion(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	valores := []int{3, 7, 10, 5, 12}
+	for _, num := range valores {
+		lista.InsertarUltimo(num)
+	}
+
+	it := lista.Iterador()
+	var encontrado int
+	hayUnElemento := false
+	for it.HaySiguiente() {
+		it.Siguiente()
+		if it.VerActual()%2 == 0 && it.VerActual() > 8 {
+			encontrado = it.VerActual()
+			hayUnElemento = true
+			break
+		}
+	}
+
+	require.True(t, hayUnElemento)
+	require.Equal(t, 10, encontrado)
+	require.True(t, it.HaySiguiente())
+}
+
+func TestIteradorMaximoYMinimo(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	nums := []int{42, -3, 7, 0, 19, -10, 8}
+	for _, num := range nums {
+		lista.InsertarUltimo(num)
+	}
+
+	it := lista.Iterador()
+
+	max, min := it.VerActual(), it.VerActual()
+
+	for it.HaySiguiente() {
+		actual := it.VerActual()
+		if actual > max {
+			max = actual
+		}
+		if actual < min {
+			min = actual
+		}
+
+		it.Siguiente()
+	}
+
+	require.Equal(t, 42, max)
+	require.Equal(t, -10, min)
+}
 func TestIteradorInternoSobreListaVacia(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
@@ -730,8 +808,8 @@ func TestIteradorInternoProductoDeTodosLosElementos(t *testing.T) {
 func TestIteradorInternoObtecionMaxYMinDeListaDeEnteros(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
-	for _, v := range []int{23, 57, 19, 41, 467, 101} {
-		lista.InsertarUltimo(v)
+	for _, num := range []int{23, 57, 19, 41, 467, 101} {
+		lista.InsertarUltimo(num)
 	}
 
 	max, min := lista.VerPrimero(), lista.VerPrimero()
@@ -755,8 +833,8 @@ func TestIteradorInternoObtecionMaxYMinDeListaDeEnteros(t *testing.T) {
 func TestIteradorInternoExisteAlgunElementoQueCumpleCondicion(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
-	for _, v := range []int{23, 57, 19, 41, 467, 101} {
-		lista.InsertarUltimo(v)
+	for _, num := range []int{23, 57, 19, 41, 467, 101} {
+		lista.InsertarUltimo(num)
 	}
 
 	esPar := func(dato int) bool {
@@ -779,8 +857,8 @@ func TestIteradorInternoExisteAlgunElementoQueCumpleCondicion(t *testing.T) {
 func TestIteradorInternoTodosLosElementosCumplenCondicion(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
-	for _, v := range []int{23, 57, 19, 41, 467, 101} {
-		lista.InsertarUltimo(v)
+	for _, num := range []int{23, 57, 19, 41, 467, 101} {
+		lista.InsertarUltimo(num)
 	}
 
 	esImpar := func(dato int) bool {
@@ -803,8 +881,8 @@ func TestIteradorInternoTodosLosElementosCumplenCondicion(t *testing.T) {
 func TestIteradorInternoDevuelveIndiceDeElemento(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
-	for _, v := range []int{23, 57, 19, 41, 467, 24, 101} {
-		lista.InsertarUltimo(v)
+	for _, num := range []int{23, 57, 19, 41, 467, 24, 101} {
+		lista.InsertarUltimo(num)
 	}
 
 	esPar := func(dato int) bool {
@@ -829,8 +907,8 @@ func TestIteradorInternoDevuelveIndiceDeElemento(t *testing.T) {
 func TestIteradorInternoFiltrarPares(t *testing.T) {
 	lista := TDALista.CrearListaEnlazada[int]()
 
-	for _, v := range []int{23, 57, 22, 41, 467, 24, 101, 38} {
-		lista.InsertarUltimo(v)
+	for _, num := range []int{23, 57, 22, 41, 467, 24, 101, 38} {
+		lista.InsertarUltimo(num)
 	}
 
 	esPar := func(dato int) bool {
