@@ -722,3 +722,142 @@ func TestIteradorInternoConcatenaStrings(t *testing.T) {
 	})
 	require.Equal(t, "Esto es una prueba sobre el iterador interno :)", texto)
 }
+
+func TestIteradorInternoProductoDeTodosLosElementos(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	for i := 1; i <= 10; i++ {
+		lista.InsertarUltimo(i)
+	}
+
+	prod := 1
+	lista.Iterar(func(dato int) bool {
+		prod *= dato
+		return true
+	})
+
+	require.Equal(t, 3628800, prod)
+
+}
+
+func TestIteradorInternoObtecionMaxYMinDeListaDeEnteros(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	for _, v := range []int{23, 57, 19, 41, 467, 101} {
+		lista.InsertarUltimo(v)
+	}
+
+	max, min := lista.VerPrimero(), lista.VerPrimero()
+	lista.Iterar(func(dato int) bool {
+		if dato < min {
+			min = dato
+		}
+
+		if dato > max {
+			max = dato
+		}
+
+		return true
+	})
+
+	require.Equal(t, 19, min)
+	require.Equal(t, 467, max)
+
+}
+
+func TestIteradorInternoExisteAlgunElementoQueCumpleCondicion(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	for _, v := range []int{23, 57, 19, 41, 467, 101} {
+		lista.InsertarUltimo(v)
+	}
+
+	esPar := func(dato int) bool {
+		return dato%2 == 0
+	}
+
+	existe := false
+	lista.Iterar(func(dato int) bool {
+		if esPar(dato) {
+			existe = true
+			return false
+		}
+		return true
+	})
+
+	require.False(t, existe)
+
+}
+
+func TestIteradorInternoTodosLosElementosCumplenCondicion(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	for _, v := range []int{23, 57, 19, 41, 467, 101} {
+		lista.InsertarUltimo(v)
+	}
+
+	esImpar := func(dato int) bool {
+		return dato%2 == 1
+	}
+
+	todosCumplen := true
+	lista.Iterar(func(dato int) bool {
+		if !esImpar(dato) {
+			todosCumplen = false
+			return false
+		}
+		return true
+	})
+
+	require.True(t, todosCumplen)
+
+}
+
+func TestIteradorInternoDevuelveIndiceDeElemento(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	for _, v := range []int{23, 57, 19, 41, 467, 24, 101} {
+		lista.InsertarUltimo(v)
+	}
+
+	esPar := func(dato int) bool {
+		return dato%2 == 0
+	}
+
+	indiceDelElemPar := -1
+	indice := 0
+	lista.Iterar(func(dato int) bool {
+		if esPar(dato) {
+			indiceDelElemPar = indice
+			return false
+		}
+		indice++
+		return true
+	})
+
+	require.Equal(t, 5, indiceDelElemPar)
+
+}
+
+func TestIteradorInternoFiltrarPares(t *testing.T) {
+	lista := TDALista.CrearListaEnlazada[int]()
+
+	for _, v := range []int{23, 57, 22, 41, 467, 24, 101, 38} {
+		lista.InsertarUltimo(v)
+	}
+
+	esPar := func(dato int) bool {
+		return dato%2 == 0
+	}
+
+	pares := make([]int, 0)
+	lista.Iterar(func(dato int) bool {
+		if esPar(dato) {
+			pares = append(pares, dato)
+		}
+		return true
+	})
+
+	require.Equal(t, []int{22, 24, 38}, pares)
+
+}
