@@ -1,24 +1,24 @@
 package lista
 
-type NodoLista[T any] struct {
-	proximo *NodoLista[T]
+type nodoLista[T any] struct {
+	proximo *nodoLista[T]
 	dato    T
 }
 
 type listaEnlazada[T any] struct {
-	primero *NodoLista[T]
-	ultimo  *NodoLista[T]
+	primero *nodoLista[T]
+	ultimo  *nodoLista[T]
 	largo   int
 }
 
 type iteradorListaEnlazada[T any] struct {
-	actual   *NodoLista[T]
-	anterior *NodoLista[T]
+	actual   *nodoLista[T]
+	anterior *nodoLista[T]
 	lista    *listaEnlazada[T]
 }
 
-func crearNuevoNodoLista[T any](dato T) *NodoLista[T] {
-	return &NodoLista[T]{
+func crearNuevoNodoLista[T any](dato T) *nodoLista[T] {
+	return &nodoLista[T]{
 		proximo: nil,
 		dato:    dato,
 	}
@@ -57,7 +57,7 @@ func (lista *listaEnlazada[T]) InsertarPrimero(dato T) {
 
 func (lista *listaEnlazada[T]) InsertarUltimo(dato T) {
 	nuevo := crearNuevoNodoLista[T](dato)
-	if lista.primero == nil {
+	if lista.EstaVacia() {
 		lista.primero = nuevo
 	} else {
 		lista.ultimo.proximo = nuevo
@@ -72,7 +72,7 @@ func (lista *listaEnlazada[T]) BorrarPrimero() T {
 	}
 	dato := lista.primero.dato
 	lista.primero = lista.primero.proximo
-	if lista.primero == nil {
+	if lista.EstaVacia() {
 		lista.ultimo = nil
 	}
 	lista.largo--
@@ -126,7 +126,7 @@ func (it *iteradorListaEnlazada[T]) Siguiente() {
 
 func (it *iteradorListaEnlazada[T]) Insertar(dato T) {
 	nuevoNodo := crearNuevoNodoLista[T](dato)
-
+	nuevoNodo.proximo = it.actual
 	if it.anterior == nil {
 		it.lista.primero = nuevoNodo
 	} else {
