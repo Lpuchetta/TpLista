@@ -29,7 +29,15 @@ func CrearHash[K comparable, V any]() Diccionario[K, V] {
 }
 
 func (hash *hashAbierto[K, V]) Guardar(clave K, dato V) {
+	index := hash.indexDe(clave)
+	par := parClaveValor[K, V]{
+		clave: clave,
+		dato:  dato,
+	}
+	hash.casillas[index].InsertarUltimo(par)
+	hash.cantidad++
 
+	// Acá deberíamos ver el tema de actualizar el factor de cargo y redimensionar.
 }
 
 func (hash *hashAbierto[K, V]) Pertenece(clave K) bool {
@@ -60,8 +68,6 @@ func (hash *hashAbierto[K, V]) Iterar(visitar func(K, V) bool) {
 func (hash *hashAbierto[K, V]) Iterador() IterDiccionario[K, V] {
 	return nil
 }
-
-func (hash *hashAbierto[K, V]) buscar()
 
 // indexDe define en que casilla del arreglo de listas enlazadas debe caer el par clave-valor.
 func (h *hashAbierto[K, V]) indexDe(clave K) int {
