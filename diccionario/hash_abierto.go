@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	_FACTOR_CARGA      = 0.7
+	_FACTOR_CARGA      = 1.2
 	_CAPACIDAD_INICIAL = 7
 )
 
@@ -60,23 +60,18 @@ func (h *hashAbierto[K, V]) Pertenece(clave K) bool {
 }
 
 func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
-	indice := h.indexDe(clave)
-	lista := h.casillas[indice]
-
-	for it := lista.Iterador(); it.HaySiguiente(); it.Siguiente() {
-		actual := it.VerActual()
-		if actual.clave == clave {
-			actual.valor = valor
-			return
+	par, pertenece := h.buscar(clave)
+	if pertenece {
+		par.valor = valor 
+	} else {
+		nuevo := parClaveValor[K, V]{
+			clave: clave,
+			valor: valor,
 		}
+	
+		lista.InsertarUltimo(nuevo)
 	}
 
-	nuevo := parClaveValor[K, V]{
-		clave: clave,
-		valor: valor,
-	}
-
-	lista.InsertarUltimo(nuevo)
 	h.cantidad++
 
 	// TODO: Acá hay que pensar en el factor de carga y en la redimensión.
@@ -125,6 +120,18 @@ func (h *hashAbierto[K, V]) Obtener(clave K) V {
 	return valor
 }
 
+func (h *hashAbierto[K, V]) buscar(clave K) (parClaveValor[K,V], bool) {
+	indice := h.indexDe(clave)
+	lista := h.casillas[indice]
+	for it := lista.Iterador(); it.HaySiguiente(); it.Siguiente() {
+		actual := it.VerActual()
+		if actual.clave == clave {
+			return actual, true 
+		}
+	}
+	return ???, false 
+}
+ 
 // indexDe define en que casilla del arreglo de listas enlazadas debe caer el par clave-valor.
 func (h *hashAbierto[K, V]) indexDe(clave K) int {
 	hv := h.hashClave(clave)
@@ -132,7 +139,6 @@ func (h *hashAbierto[K, V]) indexDe(clave K) int {
 }
 
 // hashClave usa FNV-1a para generar un hash de la clave.
-
 func (h *hashAbierto[K, V]) hashClave(clave K) uint64 {
 	hf := fnv.New64a()
 	hf.Write(convertirABytes(clave))
