@@ -88,6 +88,22 @@ func (h *hashAbierto[K, V]) Borrar(clave K) V {
 		panic("La clave no pertenece al diccionario")
 	}
 
+	indice := h.indexDe(clave)
+	lista := h.casillas[indice]
+
+	var valor V
+	for it := lista.Iterador(); it.HaySiguiente(); it.Siguiente() {
+		actual := it.VerActual()
+		if actual.clave == clave {
+			borrado := it.Borrar()
+			valor = borrado.valor
+		}
+	}
+	h.cantidad--
+
+	//TODO: Acá hay que pensar en el factor de carga y en la redimensión.
+
+	return valor
 }
 
 func (h *hashAbierto[K, V]) Obtener(clave K) V {
