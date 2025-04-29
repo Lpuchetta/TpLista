@@ -59,7 +59,27 @@ func (h *hashAbierto[K, V]) Pertenece(clave K) bool {
 	return false
 }
 
-func (h *hashAbierto[K, V]) Guardar(clave K, dato V) {
+func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
+	indice := h.indexDe(clave)
+	lista := h.casillas[indice]
+
+	for it := lista.Iterador(); it.HaySiguiente(); it.Siguiente() {
+		actual := it.VerActual()
+		if actual.clave == clave {
+			actual.valor = valor
+			return
+		}
+	}
+
+	nuevo := parClaveValor[K, V]{
+		clave: clave,
+		valor: valor,
+	}
+
+	lista.InsertarUltimo(nuevo)
+	h.cantidad++
+
+	// TODO: Acá hay que pensar en el factor de carga y en la redimensión.
 
 }
 
@@ -67,7 +87,7 @@ func (h *hashAbierto[K, V]) Borrar(clave K) V {
 	if !h.Pertenece(clave) {
 		panic("La clave no pertenece al diccionario")
 	}
-	return 2
+
 }
 
 func (h *hashAbierto[K, V]) Obtener(clave K) V {
