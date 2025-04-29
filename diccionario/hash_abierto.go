@@ -30,7 +30,7 @@ type hashAbierto[K comparable, V any] struct{
 	}
 }*/
 
-/*func CrearHash[K comparable, V any]() Diccionario[K, V]{
+func CrearHash[K comparable, V any]() Diccionario[K, V]{
 	casillas := make([]TDALista.Lista[parClaveValor[K,V]],_CAPACIDAD_INICIAL)
 	for i := range casillas{
 		casillas[i] = TDALista.CrearListaEnlazada[parClaveValor[K, V]]()
@@ -39,7 +39,7 @@ type hashAbierto[K comparable, V any] struct{
 		casillas: casillas,
 		cantidad: 0,
 	}
-}*/
+}
 //Aca tengo la duda de si esta bien o no crear el hash vacio. Entiendo que no tiene mucho sentido porque en la interfaz en ningun lugar aclara que
 //si se quiere hacer algo sobre el diccionario tire un panic en caso de que este vacio. Revisar.
 func (h *hashAbierto[K,V]) Cantidad() int {
@@ -73,12 +73,26 @@ func (h *hashAbierto[K,V]) Borrar(clave K) V{
 	if !h.Pertenece(clave){
 		panic("La clave no pertenece al diccionario")
 	}
+	return 2
 }
 
 func (h *hashAbierto[K,V]) Obtener(clave K) V{
 	if !h.Pertenece(clave){
 		panic("La clave no pertenece al diccionario")
 	}
+	indice := h.indexDe(clave)
+	lista := h.casillas[indice]
+	it := lista.Iterador()
+	var valor V
+	for it.HaySiguiente(){
+		actual := it.VerActual()
+		if actual.clave == clave{
+			valor = actual.valor
+			break
+		}
+		it.Siguiente()
+	}
+	return valor
 }
 
 // indexDe define en que casilla del arreglo de listas enlazadas debe caer el par clave-valor.
