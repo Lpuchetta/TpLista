@@ -67,8 +67,9 @@ func (h *hashAbierto[K, V]) Pertenece(clave K) bool {
 
 func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
 	indice := h.indexDe(clave) // Problema1: Tuve que hacerlo así porque sino no tenía el índice y no podía acceder a la lista en (*)
-	par, pertenece := h.buscar(clave, indice)
+	it, pertenece := h.buscar(clave, indice)
 	if pertenece {
+		par := it.VerActual()
 		par.valor = valor
 	} else {
 		nuevo := parClaveValor[K, V]{
@@ -76,7 +77,7 @@ func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
 			valor: valor,
 		}
 
-		h.casillas[indice].InsertarUltimo(nuevo) // (*) Acá tenía el Problema1.
+		it.Insertar(nuevo)
 	}
 
 	h.cantidad++
@@ -127,15 +128,16 @@ func (h *hashAbierto[K, V]) Obtener(clave K) V {
 	return valor
 }
 
-func (h *hashAbierto[K, V]) buscar(clave K, indice int) (*parClaveValor[K, V], bool) {
+func (h *hashAbierto[K, V]) buscar(clave K, indice int) (TDALista.IteradorLista[parClaveValor[K, V]], bool) {
 	lista := h.casillas[indice]
-	for it := lista.Iterador(); it.HaySiguiente(); it.Siguiente() {
+	it := lista.Iterador()
+	for ; it.HaySiguiente(); it.Siguiente() {
 		actual := it.VerActual()
 		if actual.clave == clave {
-			return &actual, true
+			return it, true
 		}
 	}
-	return nil, false
+	return it, false
 }
 
 // indexDe define en que casilla del arreglo de listas enlazadas debe caer el par clave-valor.
