@@ -45,7 +45,7 @@ func (h *hashAbierto[K, V]) Pertenece(clave K) bool {
 	if h.Cantidad() == 0 {
 		return false
 	}
-	indice := h.indexDe(clave)
+	indice := h.indexDe(clave, len(h.casillas))
 	lista := h.casillas[indice]
 	if lista.EstaVacia() {
 		return false
@@ -82,7 +82,7 @@ func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
 
 	h.cantidad++
 
-	if h.cantidad/len(h.casillas) > _FACTOR_CARGA_SUP {
+	if float64(h.cantidad/len(h.casillas)) > _FACTOR_CARGA_SUP {
 		nuevoTam := 2 * len(h.casillas)
 		h.redimensionar(nuevoTam)
 	}
@@ -105,7 +105,7 @@ func (h *hashAbierto[K, V]) Borrar(clave K) V {
 	valor := par.valor
 	h.cantidad--
 
-	if h.cantidad/len(h.casillas) < _FACTOR_CARGA_INF {
+	if float64(h.cantidad/len(h.casillas)) < _FACTOR_CARGA_INF {
 		nuevoTam := len(h.casillas) / 2
 		h.redimensionar(nuevoTam)
 	}
