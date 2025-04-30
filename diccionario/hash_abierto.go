@@ -182,30 +182,34 @@ func (h *hashAbierto[K,V]) Iterador() IterDiccionario[K, V] {
 	}
 }
 
-func (it *iteradorHash[K, V]) HaySiguiente() bool{
-	// Aca si el iterador de la lista actual tiene mas elementos devolvemos true
-	if it.iterLista.HaySiguiente(){
-		return true
-	}
-	// Aca avanzamos por las casillas hasta que encontremos un iterador con elementos 
-	for ; it.casilla < len(it.hash.casillas) - 1; it.casilla++{
-		it.iterLista = it.hash.casillas[it.casilla].Iterador()
-		if it.iterLista.HaySiguiente(){
+func (it *iteradorHash[K, V]) avanzarASiguienteNoVacia() bool {
+	for it.casilla < len(it.hash.casillas) {
+		if it.iterLista.HaySiguiente() {
 			return true
+		}
+		it.casilla++
+		if it.casilla < len(it.hash.casillas) {
+			it.iterLista = it.hash.casillas[it.casilla].Iterador()
 		}
 	}
 	return false
 }
 
+
+
+func (it *iteradorHash[K, V]) HaySiguiente() bool{
+	return it.avanzarASiguienteNoVacia()
+}
+
 func (it *iteradorHash[K, V]) Siguiente(){
-	if !it.HaySiguiente(){
+	if !it.avanzarASiguienteNoVacia(){
 		panic("El iterador termino de iterar")
 	}
 	it.iterLista.Siguiente()
 }
 
 func (it *iteradorHash[K, V]) VerActual() (K, V) {
-	if !it.HaySiguiente(){
+	if !it.avanzarASiguienteNoVacia(){
 		panic("El iterador termino de iterar")
 	}
 	par := it.iterLista.VerActual()
