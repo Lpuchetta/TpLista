@@ -32,44 +32,37 @@ func CrearHash[K comparable, V any]() Diccionario[K, V] {
 	}
 }
 
-//Aca tengo la duda de si esta bien o no crear el hash vacio. Entiendo que no tiene mucho sentido porque en la interfaz en ningun lugar aclara que
-//si se quiere hacer algo sobre el diccionario tire un panic en caso de que este vacio. Revisar.
 
-// No hay drama porque cuando lo creas, no puede ser nil
+func (h *hashAbierto[K, V]) buscarIterador(clave K) (TDALista.IteradorLista[parClaveValor[K, V]], bool) {
+	indice := h.indexDe(clave)
+	lista := h.casillas[indice]
+	it := lista.Iterador()
+	for it.HaySiguiente() {
+		if it.VerActual().clave == clave {
+			return it, true
+		}
+		it.Siguiente()
+	}
+	return nil, false
+}
+
 func (h *hashAbierto[K, V]) Cantidad() int {
 	return h.cantidad
 }
 
 func (h *hashAbierto[K, V]) Pertenece(clave K) bool {
-	if h.Cantidad() == 0 {
-		return false
-	}
-	indice := h.indexDe(clave)
-	lista := h.casillas[indice]
-	if lista.EstaVacia() {
-		return false
-	}
-	it := lista.Iterador()
-	for it.HaySiguiente() {
-		if it.VerActual().clave == clave {
-			return true
-		}
-		it.Siguiente()
-	}
-	return false
+	_, ok := h.buscarIterador(clave)
+	return ok
 }
 
 func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
+	_, ok := h.buscarIterador(clave)
+	if !ok{
+		panic("La clave no pertence al diccionario")
+	}
+
 	indice := h.indexDe(clave)
 	lista := h.casillas[indice]
-
-	for it := lista.Iterador(); it.HaySiguiente(); it.Siguiente() {
-		actual := it.VerActual()
-		if actual.clave == clave {
-			actual.valor = valor
-			return
-		}
-	}
 
 	nuevo := parClaveValor[K, V]{
 		clave: clave,
@@ -84,21 +77,12 @@ func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
 }
 
 func (h *hashAbierto[K, V]) Borrar(clave K) V {
-	if !h.Pertenece(clave) {
-		panic("La clave no pertenece al diccionario")
+	it, ok := h.buscarIterador(clave)
+	if !ok{
+		panic ("La clave no pertenece al dicciona")
 	}
-
-	indice := h.indexDe(clave)
-	lista := h.casillas[indice]
-
-	var valor V
-	for it := lista.Iterador(); it.HaySiguiente(); it.Siguiente() {
-		actual := it.VerActual()
-		if actual.clave == clave {
-			borrado := it.Borrar()
-			valor = borrado.valor
-		}
-	}
+	borrado := it.Borrar()
+	valor := borrado.valor
 	h.cantidad--
 
 	//TODO: Acá hay que pensar en el factor de carga y en la redimensión.
@@ -107,22 +91,11 @@ func (h *hashAbierto[K, V]) Borrar(clave K) V {
 }
 
 func (h *hashAbierto[K, V]) Obtener(clave K) V {
-	if !h.Pertenece(clave) {
-		panic("La clave no pertenece al diccionario")
+	it, ok := h.buscarIterador(clave)
+	if !ok{
+		panic("La clave no pertence al diccionario")
 	}
-	indice := h.indexDe(clave)
-	lista := h.casillas[indice]
-	it := lista.Iterador()
-	var valor V
-	for it.HaySiguiente() {
-		actual := it.VerActual()
-		if actual.clave == clave {
-			valor = actual.valor
-			break
-		}
-		it.Siguiente()
-	}
-	return valor
+	return it.VerActual().valor
 }
 
 // indexDe define en que casilla del arreglo de listas enlazadas debe caer el par clave-valor.
