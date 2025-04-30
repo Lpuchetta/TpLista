@@ -57,19 +57,26 @@ func (h *hashAbierto[K, V]) Pertenece(clave K) bool {
 		it.Siguiente()
 	}
 	return false
+
+	// Acá se reduce a:
+
+	// indice := h.indexDe(clave)
+	// _, pertenece := h.buscar(clave, indice)
+	// return pertenece
 }
 
 func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
-	par, pertenece := h.buscar(clave)
+	indice := h.indexDe(clave) // Problema1: Tuve que hacerlo así porque sino no tenía el índice y no podía acceder a la lista en (*)
+	par, pertenece := h.buscar(clave, indice)
 	if pertenece {
-		par.valor = valor 
+		par.valor = valor
 	} else {
 		nuevo := parClaveValor[K, V]{
 			clave: clave,
 			valor: valor,
 		}
-	
-		lista.InsertarUltimo(nuevo)
+
+		h.casillas[indice].InsertarUltimo(nuevo) // (*) Acá tenía el Problema1.
 	}
 
 	h.cantidad++
@@ -120,18 +127,17 @@ func (h *hashAbierto[K, V]) Obtener(clave K) V {
 	return valor
 }
 
-func (h *hashAbierto[K, V]) buscar(clave K) (parClaveValor[K,V], bool) {
-	indice := h.indexDe(clave)
+func (h *hashAbierto[K, V]) buscar(clave K, indice int) (*parClaveValor[K, V], bool) {
 	lista := h.casillas[indice]
 	for it := lista.Iterador(); it.HaySiguiente(); it.Siguiente() {
 		actual := it.VerActual()
 		if actual.clave == clave {
-			return actual, true 
+			return &actual, true
 		}
 	}
-	return ???, false 
+	return nil, false
 }
- 
+
 // indexDe define en que casilla del arreglo de listas enlazadas debe caer el par clave-valor.
 func (h *hashAbierto[K, V]) indexDe(clave K) int {
 	hv := h.hashClave(clave)
