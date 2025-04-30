@@ -82,9 +82,7 @@ func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
 
 	h.cantidad++
 
-	// TODO: Acá hay que pensar en el factor de carga y en la redimensión.
-
-	if h.cantidad/len(h.casillas) > _FACTOR_CARGA {
+	if h.cantidad/len(h.casillas) > _FACTOR_CARGA_SUP {
 		nuevoTam := 2 * len(h.casillas)
 		h.redimensionar(nuevoTam)
 	}
@@ -149,11 +147,26 @@ func (h *hashAbierto[K, V]) Obtener(clave K) V {
 }
 
 func (h *hashAbierto[K, V]) redimensionar(nuevoTam int) {
+	nuevas := make([]TDALista.Lista[parClaveValor[K, V]], nuevoTam)
+	for i := range nuevoTam {
+		nuevas[i] = TDALista.CrearListaEnlazada[parClaveValor[K, V]]()
+	}
+
+	for _, casilla := range h.casillas {
+
+		for it := casilla.Iterador(); it.HaySiguiente(); it.Siguiente() {
+			par := it.VerActual()
+			indice := h.indexDe(par.clave, nuevoTam)
+			nuevas[indice].InsertarUltimo(par)
+		}
+	}
+
+	h.casillas = nuevas
 
 }
 
 func (h *hashAbierto[K, V]) buscar(clave K) (TDALista.IteradorLista[parClaveValor[K, V]], bool) {
-	indice := h.indexDe(clave)
+	indice := h.indexDe(clave, len(h.casillas))
 	lista := h.casillas[indice]
 	it := lista.Iterador()
 	for ; it.HaySiguiente(); it.Siguiente() {
@@ -166,9 +179,9 @@ func (h *hashAbierto[K, V]) buscar(clave K) (TDALista.IteradorLista[parClaveValo
 }
 
 // indexDe define en que casilla del arreglo de listas enlazadas debe caer el par clave-valor.
-func (h *hashAbierto[K, V]) indexDe(clave K) int {
+func (h *hashAbierto[K, V]) indexDe(clave K, tamCasillas int) int {
 	hv := h.hashClave(clave)
-	return int(hv % uint64(len(h.casillas)))
+	return int(hv % uint64(tamCasillas))
 }
 
 // hashClave usa FNV-1a para generar un hash de la clave.
