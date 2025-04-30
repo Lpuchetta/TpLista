@@ -22,6 +22,12 @@ type hashAbierto[K comparable, V any] struct {
 	cantidad int
 }
 
+type iteradorHash[K comparable, V any] struct{
+	hash  *hashAbierto[K,V]
+	casilla int
+	iterLista	TDALista.IteradorLista[parClaveValor[K, V]]
+}
+
 func CrearHash[K comparable, V any]() Diccionario[K, V] {
 	casillas := make([]TDALista.Lista[parClaveValor[K, V]], _CAPACIDAD_INICIAL)
 	for i := range casillas {
@@ -42,28 +48,16 @@ func (h *hashAbierto[K, V]) Cantidad() int {
 }
 
 func (h *hashAbierto[K, V]) Pertenece(clave K) bool {
-	if h.Cantidad() == 0 {
-		return false
-	}
-	indice := h.indexDe(clave, len(h.casillas))
-	lista := h.casillas[indice]
-	if lista.EstaVacia() {
-		return false
-	}
-	it := lista.Iterador()
-	for it.HaySiguiente() {
-		if it.VerActual().clave == clave {
-			return true
-		}
-		it.Siguiente()
-	}
-	return false
+	_, pertenece := h.buscar(clave)
+	return pertenece
 
 	// Acá se reduce a:
 
 	// indice := h.indexDe(clave)
 	// _, pertenece := h.buscar(clave, indice)
 	// return pertenece
+
+	//No haria falta hacer indice := k.indexDe(clave), lo hace buscar a eso
 }
 
 func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
@@ -71,16 +65,15 @@ func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
 	if pertenece {
 		par := it.VerActual()
 		par.valor = valor
-	} else {
-		nuevo := parClaveValor[K, V]{
-			clave: clave,
-			valor: valor,
-		}
-
-		it.Insertar(nuevo)
+		it.Borrar()
+		it.Insertar(par)
+		return 
 	}
-
+	nuevo := parClaveValor[K, V]{clave, valor}
+	it.Insertar(nuevo)
 	h.cantidad++
+	//Cambie esta parte porque si la clave ya esta en el hash actualizamos el valor y no aumentamos la cantindad, antes pasaba
+	//Que aunque la clave estaba se pisaba el valor y se aumentamaba igual
 
 	if float64(h.cantidad/len(h.casillas)) > _FACTOR_CARGA_SUP {
 		nuevoTam := 2 * len(h.casillas)
@@ -114,25 +107,8 @@ func (h *hashAbierto[K, V]) Borrar(clave K) V {
 }
 
 func (h *hashAbierto[K, V]) Obtener(clave K) V {
-	// if !h.Pertenece(clave) {
-	// 	panic("La clave no pertenece al diccionario")
-	// }
-	// indice := h.indexDe(clave)
-	// lista := h.casillas[indice]
-	// it := lista.Iterador()
-	// var valor V
-	// for it.HaySiguiente() {
-	// 	actual := it.VerActual()
-	// 	if actual.clave == clave {
-	// 		valor = actual.valor
-	// 		break
-	// 	}
-	// 	it.Siguiente()
-	// }
-	// return valor
-
+	
 	// Acá quedaría así:
-
 	it, encontrado := h.buscar(clave)
 	var par parClaveValor[K, V]
 	if !encontrado {
@@ -144,11 +120,13 @@ func (h *hashAbierto[K, V]) Obtener(clave K) V {
 
 	return valor
 
+	//hermoso
+
 }
 
 func (h *hashAbierto[K, V]) redimensionar(nuevoTam int) {
 	nuevas := make([]TDALista.Lista[parClaveValor[K, V]], nuevoTam)
-	for i := range nuevoTam {
+	for i := 0; i < nuevoTam; i++{ //Cambio esto porque el range no se puede hacer sobre enteros
 		nuevas[i] = TDALista.CrearListaEnlazada[parClaveValor[K, V]]()
 	}
 
@@ -195,3 +173,43 @@ func (h *hashAbierto[K, V]) hashClave(clave K) uint64 {
 func convertirABytes[K comparable](clave K) []byte {
 	return []byte(fmt.Sprintf("%v", clave))
 }
+
+func (h *hashAbierto[K,V]) Iterador() IterDiccionario[K, V] {
+	return &iteradorHash[K,V]{
+		hash: h,
+		casilla: 0,
+		iterLista: h.casillas[0].Iterador(),
+	}
+}
+
+func (it *iteradorHash[K, V]) HaySiguiente() bool{
+	// Aca si el iterador de la lista actual tiene mas elementos devolvemos true
+	if it.iterLista.HaySiguiente(){
+		return true
+	}
+	// Aca avanzamos por las casillas hasta que encontremos un iterador con elementos 
+	for ; it.casilla < len(it.hash.casillas) - 1; it.casilla++{
+		it.iterLista = it.hash.casillas[it.casilla].Iterador()
+		if it.iterLista.HaySiguiente(){
+			return true
+		}
+	}
+	return false
+}
+
+func (it *iteradorHash[K, V]) Siguiente(){
+	if !it.HaySiguiente(){
+		panic("El iterador termino de iterar")
+	}
+	it.iterLista.Siguiente()
+}
+
+func (it *iteradorHash[K, V]) VerActual() (K, V) {
+	if !it.HaySiguiente(){
+		panic("El iterador termino de iterar")
+	}
+	par := it.iterLista.VerActual()
+	return par.clave, par.valor
+}
+
+
