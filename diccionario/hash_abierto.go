@@ -7,7 +7,8 @@ import (
 )
 
 const (
-	_FACTOR_CARGA      = 1.2
+	_FACTOR_CARGA_SUP  = 1.2
+	_FACTOR_CARGA_INF  = 0.3
 	_CAPACIDAD_INICIAL = 7
 )
 
@@ -83,6 +84,11 @@ func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
 
 	// TODO: Acá hay que pensar en el factor de carga y en la redimensión.
 
+	if h.cantidad/len(h.casillas) > _FACTOR_CARGA {
+		nuevoTam := 2 * len(h.casillas)
+		h.redimensionar(nuevoTam)
+	}
+
 }
 
 func (h *hashAbierto[K, V]) Borrar(clave K) V {
@@ -101,7 +107,10 @@ func (h *hashAbierto[K, V]) Borrar(clave K) V {
 	valor := par.valor
 	h.cantidad--
 
-	//TODO: Acá hay que pensar en el factor de carga y en la redimensión.
+	if h.cantidad/len(h.casillas) < _FACTOR_CARGA_INF {
+		nuevoTam := len(h.casillas) / 2
+		h.redimensionar(nuevoTam)
+	}
 
 	return valor
 }
@@ -136,6 +145,10 @@ func (h *hashAbierto[K, V]) Obtener(clave K) V {
 	valor := par.valor
 
 	return valor
+
+}
+
+func (h *hashAbierto[K, V]) redimensionar(nuevoTam int) {
 
 }
 
