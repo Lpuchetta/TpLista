@@ -107,22 +107,36 @@ func (h *hashAbierto[K, V]) Borrar(clave K) V {
 }
 
 func (h *hashAbierto[K, V]) Obtener(clave K) V {
-	if !h.Pertenece(clave) {
+	// if !h.Pertenece(clave) {
+	// 	panic("La clave no pertenece al diccionario")
+	// }
+	// indice := h.indexDe(clave)
+	// lista := h.casillas[indice]
+	// it := lista.Iterador()
+	// var valor V
+	// for it.HaySiguiente() {
+	// 	actual := it.VerActual()
+	// 	if actual.clave == clave {
+	// 		valor = actual.valor
+	// 		break
+	// 	}
+	// 	it.Siguiente()
+	// }
+	// return valor
+
+	// Acá quedaría así:
+
+	it, encontrado := h.buscar(clave)
+	var par parClaveValor[K, V]
+	if !encontrado {
 		panic("La clave no pertenece al diccionario")
+	} else {
+		par = it.VerActual()
 	}
-	indice := h.indexDe(clave)
-	lista := h.casillas[indice]
-	it := lista.Iterador()
-	var valor V
-	for it.HaySiguiente() {
-		actual := it.VerActual()
-		if actual.clave == clave {
-			valor = actual.valor
-			break
-		}
-		it.Siguiente()
-	}
+	valor := par.valor
+
 	return valor
+
 }
 
 func (h *hashAbierto[K, V]) buscar(clave K) (TDALista.IteradorLista[parClaveValor[K, V]], bool) {
