@@ -66,8 +66,7 @@ func (h *hashAbierto[K, V]) Pertenece(clave K) bool {
 }
 
 func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
-	indice := h.indexDe(clave) // Problema1: Tuve que hacerlo así porque sino no tenía el índice y no podía acceder a la lista en (*)
-	it, pertenece := h.buscar(clave, indice)
+	it, pertenece := h.buscar(clave)
 	if pertenece {
 		par := it.VerActual()
 		par.valor = valor
@@ -87,21 +86,19 @@ func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
 }
 
 func (h *hashAbierto[K, V]) Borrar(clave K) V {
-	if !h.Pertenece(clave) {
+	// if !h.Pertenece(clave) {
+	// 	panic("La clave no pertenece al diccionario")
+	// }
+
+	it, encontrado := h.buscar(clave)
+	var par parClaveValor[K, V]
+	if !encontrado {
 		panic("La clave no pertenece al diccionario")
+	} else {
+		par = it.Borrar()
 	}
 
-	indice := h.indexDe(clave)
-	lista := h.casillas[indice]
-
-	var valor V
-	for it := lista.Iterador(); it.HaySiguiente(); it.Siguiente() {
-		actual := it.VerActual()
-		if actual.clave == clave {
-			borrado := it.Borrar()
-			valor = borrado.valor
-		}
-	}
+	valor := par.valor
 	h.cantidad--
 
 	//TODO: Acá hay que pensar en el factor de carga y en la redimensión.
@@ -128,7 +125,8 @@ func (h *hashAbierto[K, V]) Obtener(clave K) V {
 	return valor
 }
 
-func (h *hashAbierto[K, V]) buscar(clave K, indice int) (TDALista.IteradorLista[parClaveValor[K, V]], bool) {
+func (h *hashAbierto[K, V]) buscar(clave K) (TDALista.IteradorLista[parClaveValor[K, V]], bool) {
+	indice := h.indexDe(clave)
 	lista := h.casillas[indice]
 	it := lista.Iterador()
 	for ; it.HaySiguiente(); it.Siguiente() {
