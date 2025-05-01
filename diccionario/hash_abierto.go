@@ -24,7 +24,6 @@ type hashAbierto[K comparable, V any] struct {
 
 type iterDiccionario[K comparable, V any] struct {
 	hash      *hashAbierto[K, V]
-	casilla   TDALista.Lista[parClaveValor[K, V]]
 	itLista   TDALista.IteradorLista[parClaveValor[K, V]]
 	posActual int
 }
@@ -45,16 +44,12 @@ func CrearIteradorDiccionario[K comparable, V any](h *hashAbierto[K, V]) IterDic
 	for posActual < len(h.casillas) && h.casillas[posActual].EstaVacia() {
 		posActual++
 	}
-
-	var casilla TDALista.Lista[parClaveValor[K, V]]
 	var itLista TDALista.IteradorLista[parClaveValor[K, V]]
 	if posActual < len(h.casillas) {
-		casilla = h.casillas[posActual]
-		itLista = casilla.Iterador()
+		itLista = h.casillas[posActual].Iterador()
 	}
 	return &iterDiccionario[K, V]{
 		hash:      h,
-		casilla:   casilla,
 		itLista:   itLista,
 		posActual: posActual,
 	}
@@ -70,8 +65,8 @@ func (h *hashAbierto[K, V]) Pertenece(clave K) bool {
 }
 
 func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
-	it, pertenece := h.buscar(clave)
-	if pertenece {
+	it, encontrado := h.buscar(clave)
+	if encontrado {
 		par := it.VerActual()
 		par.valor = valor
 		return
@@ -89,10 +84,6 @@ func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
 }
 
 func (h *hashAbierto[K, V]) Borrar(clave K) V {
-	// if !h.Pertenece(clave) {
-	// 	panic("La clave no pertenece al diccionario")
-	// }
-
 	it, encontrado := h.buscar(clave)
 	var par parClaveValor[K, V]
 	if !encontrado {
@@ -104,7 +95,7 @@ func (h *hashAbierto[K, V]) Borrar(clave K) V {
 	valor := par.valor
 	h.cantidad--
 
-	if float64(h.cantidad/len(h.casillas)) < _FACTOR_CARGA_INF {
+	if float64(h.cantidad/len(h.casillas)) < _FACTOR_CARGA_INF && float64(h.cantidad/len(h.casillas)) > _CAPACIDAD_INICIAL {
 		nuevoTam := len(h.casillas) / 2
 		h.redimensionar(nuevoTam)
 	}
@@ -113,25 +104,6 @@ func (h *hashAbierto[K, V]) Borrar(clave K) V {
 }
 
 func (h *hashAbierto[K, V]) Obtener(clave K) V {
-	// if !h.Pertenece(clave) {
-	// 	panic("La clave no pertenece al diccionario")
-	// }
-	// indice := h.indexDe(clave)
-	// lista := h.casillas[indice]
-	// it := lista.Iterador()
-	// var valor V
-	// for it.HaySiguiente() {
-	// 	actual := it.VerActual()
-	// 	if actual.clave == clave {
-	// 		valor = actual.valor
-	// 		break
-	// 	}
-	// 	it.Siguiente()
-	// }
-	// return valor
-
-	// Acá quedaría así:
-
 	it, encontrado := h.buscar(clave)
 	var par parClaveValor[K, V]
 	if !encontrado {
@@ -139,6 +111,7 @@ func (h *hashAbierto[K, V]) Obtener(clave K) V {
 	} else {
 		par = it.VerActual()
 	}
+
 	valor := par.valor
 
 	return valor
@@ -162,26 +135,25 @@ func (h *hashAbierto[K, V]) Iterador() IterDiccionario[K, V] {
 }
 
 func (h *hashAbierto[K, V]) redimensionar(nuevoTam int) {
-	if nuevoTam <= 0 {
+	if nuevoTam == len(h.casillas) || nuevoTam <= 0 {
 		return
 	}
 
 	nuevas := make([]TDALista.Lista[parClaveValor[K, V]], nuevoTam)
-	for i := range nuevoTam {
+	for i := range nuevas {
 		nuevas[i] = TDALista.CrearListaEnlazada[parClaveValor[K, V]]()
 	}
 
 	for _, casilla := range h.casillas {
-
-		for it := casilla.Iterador(); it.HaySiguiente(); it.Siguiente() {
+		for it := casilla.Iterador(); it.HaySiguiente(); {
 			par := it.VerActual()
 			indice := h.indexDe(par.clave, nuevoTam)
 			nuevas[indice].InsertarUltimo(par)
+			it.Siguiente()
 		}
 	}
 
 	h.casillas = nuevas
-
 }
 
 func (h *hashAbierto[K, V]) buscar(clave K) (TDALista.IteradorLista[parClaveValor[K, V]], bool) {
@@ -198,7 +170,7 @@ func (h *hashAbierto[K, V]) buscar(clave K) (TDALista.IteradorLista[parClaveValo
 }
 
 func (it *iterDiccionario[K, V]) HaySiguiente() bool {
-	return it.posActual != len(it.hash.casillas) && it.itLista != nil && it.itLista.HaySiguiente()
+	return it.itLista != nil && it.itLista.HaySiguiente()
 }
 
 func (it *iterDiccionario[K, V]) VerActual() (K, V) {
@@ -221,16 +193,16 @@ func (it *iterDiccionario[K, V]) Siguiente() {
 }
 
 func (it *iterDiccionario[K, V]) buscarProxPos() {
-	posActual := it.posActual
-	for posActual < len(it.hash.casillas) && it.hash.casillas[posActual].EstaVacia() {
-		posActual++
+	it.posActual++
+	for it.posActual < len(it.hash.casillas) && it.hash.casillas[it.posActual].EstaVacia() {
+		it.posActual++
+	}
+	if it.posActual < len(it.hash.casillas) {
+		it.itLista = it.hash.casillas[it.posActual].Iterador()
+	} else {
+		it.itLista = nil
 	}
 
-	itLista := it.hash.casillas[posActual].Iterador()
-
-	it.casilla = it.hash.casillas[posActual]
-	it.itLista = itLista
-	it.posActual = posActual
 }
 
 // indexDe define en que casilla del arreglo de listas enlazadas debe caer el par clave-valor.
