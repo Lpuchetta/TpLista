@@ -2,7 +2,7 @@ package diccionario
 
 import (
 	"fmt"
-	"hash/fnv" //Una funcion de hash que prove go, si queres fijate en esta pagina. https://pkg.go.dev/hash/fnv#New64a
+	"hash/fnv"
 	TDALista "tdas/lista"
 )
 
@@ -39,10 +39,6 @@ func CrearHash[K comparable, V any]() Diccionario[K, V] {
 	}
 }
 
-//Aca tengo la duda de si esta bien o no crear el hash vacio. Entiendo que no tiene mucho sentido porque en la interfaz en ningun lugar aclara que
-//si se quiere hacer algo sobre el diccionario tire un panic en caso de que este vacio. Revisar.
-
-// No hay drama porque cuando lo creas, no puede ser nil
 func (h *hashAbierto[K, V]) Cantidad() int {
 	return h.cantidad
 }
@@ -50,14 +46,6 @@ func (h *hashAbierto[K, V]) Cantidad() int {
 func (h *hashAbierto[K, V]) Pertenece(clave K) bool {
 	_, pertenece := h.buscar(clave)
 	return pertenece
-
-	// Acá se reduce a:
-
-	// indice := h.indexDe(clave)
-	// _, pertenece := h.buscar(clave, indice)
-	// return pertenece
-
-	//No haria falta hacer indice := k.indexDe(clave), lo hace buscar a eso
 }
 
 func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
@@ -83,10 +71,6 @@ func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
 }
 
 func (h *hashAbierto[K, V]) Borrar(clave K) V {
-	// if !h.Pertenece(clave) {
-	// 	panic("La clave no pertenece al diccionario")
-	// }
-
 	it, encontrado := h.buscar(clave)
 	var par parClaveValor[K, V]
 	if !encontrado {
@@ -108,7 +92,6 @@ func (h *hashAbierto[K, V]) Borrar(clave K) V {
 
 func (h *hashAbierto[K, V]) Obtener(clave K) V {
 	
-	// Acá quedaría así:
 	it, encontrado := h.buscar(clave)
 	var par parClaveValor[K, V]
 	if !encontrado {
@@ -119,9 +102,6 @@ func (h *hashAbierto[K, V]) Obtener(clave K) V {
 	valor := par.valor
 
 	return valor
-
-	//hermoso
-
 }
 
 func (h *hashAbierto[K, V]) redimensionar(nuevoTam int) {
