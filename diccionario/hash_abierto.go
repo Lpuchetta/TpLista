@@ -146,6 +146,18 @@ func (h *hashAbierto[K, V]) Obtener(clave K) V {
 
 }
 
+func (h *hashAbierto[K, V]) Iterar(visitar func(K, V) bool) {
+	for _, casilla := range h.casillas {
+		for it := casilla.Iterador(); it.HaySiguiente(); it.Siguiente() {
+			par := it.VerActual()
+			clave, valor := par.clave, par.valor
+			if visitar(clave, valor) {
+				return
+			}
+		}
+	}
+}
+
 func (h *hashAbierto[K, V]) redimensionar(nuevoTam int) {
 	nuevas := make([]TDALista.Lista[parClaveValor[K, V]], nuevoTam)
 	for i := range nuevoTam {
