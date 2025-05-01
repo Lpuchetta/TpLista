@@ -22,6 +22,13 @@ type hashAbierto[K comparable, V any] struct {
 	cantidad int
 }
 
+type iterDiccionario[K comparable, V any] struct {
+	hash      *hashAbierto[K, V]
+	casilla   TDALista.Lista[parClaveValor[K, V]]
+	itLista   TDALista.IteradorLista[parClaveValor[K, V]]
+	posActual int
+}
+
 func CrearHash[K comparable, V any]() Diccionario[K, V] {
 	casillas := make([]TDALista.Lista[parClaveValor[K, V]], _CAPACIDAD_INICIAL)
 	for i := range casillas {
@@ -33,10 +40,22 @@ func CrearHash[K comparable, V any]() Diccionario[K, V] {
 	}
 }
 
-//Aca tengo la duda de si esta bien o no crear el hash vacio. Entiendo que no tiene mucho sentido porque en la interfaz en ningun lugar aclara que
-//si se quiere hacer algo sobre el diccionario tire un panic en caso de que este vacio. Revisar.
+func CrearIteradorDiccionario[K comparable, V any](h *hashAbierto[K, V]) IterDiccionario[K, V] {
+	posActual := 0
+	for h.casillas[posActual].EstaVacia() {
+		posActual++
+	}
 
-// No hay drama porque cuando lo creas, no puede ser nil
+	it := h.casillas[posActual].Iterador()
+
+	return &iterDiccionario[K, V]{
+		hash:      h,
+		casilla:   h.casillas[posActual],
+		itLista:   it,
+		posActual: posActual,
+	}
+}
+
 func (h *hashAbierto[K, V]) Cantidad() int {
 	return h.cantidad
 }
@@ -158,7 +177,15 @@ func (h *hashAbierto[K, V]) Iterar(visitar func(K, V) bool) {
 	}
 }
 
+func (h *hashAbierto[K, V]) Iterador() IterDiccionario[K, V] {
+	return CrearIteradorDiccionario(h)
+}
+
 func (h *hashAbierto[K, V]) redimensionar(nuevoTam int) {
+	if nuevoTam <= 0 {
+		return
+	}
+
 	nuevas := make([]TDALista.Lista[parClaveValor[K, V]], nuevoTam)
 	for i := range nuevoTam {
 		nuevas[i] = TDALista.CrearListaEnlazada[parClaveValor[K, V]]()
@@ -188,6 +215,42 @@ func (h *hashAbierto[K, V]) buscar(clave K) (TDALista.IteradorLista[parClaveValo
 		}
 	}
 	return it, false
+}
+
+func (it *iterDiccionario[K, V]) HaySiguiente() bool {
+	return it.posActual != len(it.hash.casillas)
+}
+
+func (it *iterDiccionario[K, V]) VerActual() (K, V) {
+	if !it.HaySiguiente() {
+		panic("El iterador termino de iterar")
+	}
+	par := it.itLista.VerActual()
+	return par.clave, par.valor
+}
+
+func (it *iterDiccionario[K, V]) Siguiente() {
+	if !it.HaySiguiente() {
+		panic("El iterador termino de iterar")
+	}
+
+}
+
+func (it *iterDiccionario[K, V]) buscarProxPos() {
+	if it.itLista.HaySiguiente() {
+		it.Siguiente()
+	} else {
+		posActual := it.posActual
+		for posActual < len(it.hash.casillas) && it.hash.casillas[posActual].EstaVacia() {
+			posActual++
+		}
+
+		itLista := it.hash.casillas[posActual].Iterador()
+
+		it.casilla = it.hash.casillas[posActual]
+		it.itLista = itLista
+		it.posActual = posActual
+	}
 }
 
 // indexDe define en que casilla del arreglo de listas enlazadas debe caer el par clave-valor.
