@@ -63,11 +63,11 @@ func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
 	//Cambie esta parte porque si la clave ya esta en el hash actualizamos el valor y no aumentamos la cantindad, antes pasaba
 	//Que aunque la clave estaba se pisaba el valor y se aumentamaba igual
 
-	if float64(h.cantidad/len(h.casillas)) > _FACTOR_CARGA_SUP {
-		nuevoTam := 2 * len(h.casillas)
-		h.redimensionar(nuevoTam)
+	if float64(h.cantidad)/float64(len(h.casillas)) < _FACTOR_CARGA_INF {
+	    nuevoTam := len(h.casillas) / 2
+	     h.redimensionar(nuevoTam)
 	}
-
+	
 }
 
 func (h *hashAbierto[K, V]) Borrar(clave K) V {
@@ -83,8 +83,8 @@ func (h *hashAbierto[K, V]) Borrar(clave K) V {
 	h.cantidad--
 
 	if float64(h.cantidad/len(h.casillas)) < _FACTOR_CARGA_INF {
-		nuevoTam := len(h.casillas) / 2
-		h.redimensionar(nuevoTam)
+	    nuevoTam := len(h.casillas) / 2
+	    h.redimensionar(nuevoTam)
 	}
 
 	return valor
@@ -105,20 +105,24 @@ func (h *hashAbierto[K, V]) Obtener(clave K) V {
 }
 
 func (h *hashAbierto[K, V]) redimensionar(nuevoTam int) {
+	if nuevoTam <= 0{
+		return //Agrego esta linea por el caso en que el nuevo tamaño sea menor o igual a 0. Asi no redimensionamos y nos evitamos dividir por zero o cosas asi.
+	}
+
 	nuevas := make([]TDALista.Lista[parClaveValor[K, V]], nuevoTam)
 	for i := 0; i < nuevoTam; i++{ //Cambio esto porque el range no se puede hacer sobre enteros
 		nuevas[i] = TDALista.CrearListaEnlazada[parClaveValor[K, V]]()
 	}
-
+	cantNueva := 0
 	for _, casilla := range h.casillas {
 
 		for it := casilla.Iterador(); it.HaySiguiente(); it.Siguiente() {
 			par := it.VerActual()
 			indice := h.indexDe(par.clave, nuevoTam)
 			nuevas[indice].InsertarUltimo(par)
+			cantNueva++
 		}
 	}
-
 	h.casillas = nuevas
 
 }
@@ -154,6 +158,7 @@ func convertirABytes[K comparable](clave K) []byte {
 	return []byte(fmt.Sprintf("%v", clave))
 }
 
+
 func (h *hashAbierto[K,V]) Iterador() IterDiccionario[K, V] {
 	return &iteradorHash[K,V]{
 		hash: h,
@@ -161,6 +166,9 @@ func (h *hashAbierto[K,V]) Iterador() IterDiccionario[K, V] {
 		iterLista: h.casillas[0].Iterador(),
 	}
 }
+
+
+
 
 func (it *iteradorHash[K, V]) avanzarASiguienteNoVacia() bool {
 	for it.casilla < len(it.hash.casillas) {
