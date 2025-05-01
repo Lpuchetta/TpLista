@@ -63,44 +63,39 @@ func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
 	//Cambie esta parte porque si la clave ya esta en el hash actualizamos el valor y no aumentamos la cantindad, antes pasaba
 	//Que aunque la clave estaba se pisaba el valor y se aumentamaba igual
 
-	if float64(h.cantidad)/float64(len(h.casillas)) < _FACTOR_CARGA_INF {
-	    nuevoTam := len(h.casillas) / 2
-	     h.redimensionar(nuevoTam)
+	factorDeCarga := float64(h.cantidad) / float64(len(h.casillas))
+	if factorDeCarga > _FACTOR_CARGA_SUP{
+		h.redimensionar(len(h.casillas) * 2)
 	}
 	
 }
 
 func (h *hashAbierto[K, V]) Borrar(clave K) V {
-	it, encontrado := h.buscar(clave)
-	var par parClaveValor[K, V]
+	par, encontrado := h.obtenerParClaveValor(clave)
 	if !encontrado {
 		panic("La clave no pertenece al diccionario")
-	} else {
-		par = it.Borrar()
 	}
 
+	it, _ := h.buscar(clave)
+	it.Borrar()
+	
 	valor := par.valor
 	h.cantidad--
-
-	if float64(h.cantidad/len(h.casillas)) < _FACTOR_CARGA_INF {
-	    nuevoTam := len(h.casillas) / 2
-	    h.redimensionar(nuevoTam)
+	factorDeCarga := float64(h.cantidad)/ float64(len(h.casillas))
+	if factorDeCarga < _FACTOR_CARGA_INF && len(h.casillas) > _CAPACIDAD_INICIAL {
+			nuevoTam := len(h.casillas) / 2
+			h.redimensionar(nuevoTam)
 	}
 
 	return valor
 }
 
 func (h *hashAbierto[K, V]) Obtener(clave K) V {
-	
-	it, encontrado := h.buscar(clave)
-	var par parClaveValor[K, V]
+	par,encontrado := h.obtenerParClaveValor(clave)
 	if !encontrado {
 		panic("La clave no pertenece al diccionario")
-	} else {
-		par = it.VerActual()
 	}
 	valor := par.valor
-
 	return valor
 }
 
@@ -140,6 +135,27 @@ func (h *hashAbierto[K, V]) buscar(clave K) (TDALista.IteradorLista[parClaveValo
 	return it, false
 }
 
+func (h *hashAbierto[K,V]) obtenerParClaveValor(clave K) (parClaveValor[K,V], bool) {
+	it, encontrado := h.buscar(clave)
+	if !encontrado {
+		return parClaveValor[K,V]{},false
+		
+	}
+	return it.VerActual(), true
+}
+
+func (h *hashAbierto[K,V]) Iterar(visitar func(clave K, valor V) bool){
+	it := h.Iterador()
+
+	for it.HaySiguiente(){
+		clave, valor := it.VerActual()
+		if !visitar(clave, valor){
+			return
+		}
+		it.Siguiente()
+	}
+} 
+
 // indexDe define en que casilla del arreglo de listas enlazadas debe caer el par clave-valor.
 func (h *hashAbierto[K, V]) indexDe(clave K, tamCasillas int) int {
 	hv := h.hashClave(clave)
@@ -167,41 +183,35 @@ func (h *hashAbierto[K,V]) Iterador() IterDiccionario[K, V] {
 	}
 }
 
-
-
-
-func (it *iteradorHash[K, V]) avanzarASiguienteNoVacia() bool {
-	for it.casilla < len(it.hash.casillas) {
-		if it.iterLista.HaySiguiente() {
-			return true
-		}
-		it.casilla++
-		if it.casilla < len(it.hash.casillas) {
-			it.iterLista = it.hash.casillas[it.casilla].Iterador()
-		}
-	}
-	return false
-}
-
-
-
 func (it *iteradorHash[K, V]) HaySiguiente() bool{
-	return it.avanzarASiguienteNoVacia()
+	return it.avanzarCasilla()
 }
 
 func (it *iteradorHash[K, V]) Siguiente(){
-	if !it.avanzarASiguienteNoVacia(){
+	if !it.avanzarCasilla(){
 		panic("El iterador termino de iterar")
 	}
 	it.iterLista.Siguiente()
 }
 
 func (it *iteradorHash[K, V]) VerActual() (K, V) {
-	if !it.avanzarASiguienteNoVacia(){
+	if !it.avanzarCasilla(){
 		panic("El iterador termino de iterar")
 	}
 	par := it.iterLista.VerActual()
 	return par.clave, par.valor
 }
 
+func (it *iteradorHash[K, V]) avanzarCasilla() bool{
+	for it.casilla < len(it.hash.casillas){
+		if it.iterLista.HaySiguiente(){
+			return true
+		}
+		it.casilla++
+		if it.casilla < len(it.hash.casillas){
+			it.iterLista = it.hash.casillas[it.casilla].Iterador()
+		}
+	}
+	return false
+}
 
