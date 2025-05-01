@@ -65,28 +65,8 @@ func (h *hashAbierto[K, V]) Cantidad() int {
 }
 
 func (h *hashAbierto[K, V]) Pertenece(clave K) bool {
-	if h.Cantidad() == 0 {
-		return false
-	}
-	indice := h.indexDe(clave, len(h.casillas))
-	lista := h.casillas[indice]
-	if lista.EstaVacia() {
-		return false
-	}
-	it := lista.Iterador()
-	for it.HaySiguiente() {
-		if it.VerActual().clave == clave {
-			return true
-		}
-		it.Siguiente()
-	}
-	return false
-
-	// Acá se reduce a:
-
-	// indice := h.indexDe(clave)
-	// _, pertenece := h.buscar(clave, indice)
-	// return pertenece
+	_, pertenece := h.buscar(clave)
+	return pertenece
 }
 
 func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
@@ -94,19 +74,15 @@ func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
 	if pertenece {
 		par := it.VerActual()
 		par.valor = valor
-	} else {
-		nuevo := parClaveValor[K, V]{
-			clave: clave,
-			valor: valor,
-		}
-
-		it.Insertar(nuevo)
+		return
 	}
 
+	nuevo := parClaveValor[K, V]{clave, valor}
+	it.Insertar(nuevo)
 	h.cantidad++
 
-	if float64(h.cantidad/len(h.casillas)) > _FACTOR_CARGA_SUP {
-		nuevoTam := 2 * len(h.casillas)
+	if float64(h.cantidad)/float64(len(h.casillas)) > _FACTOR_CARGA_SUP {
+		nuevoTam := len(h.casillas) / 2
 		h.redimensionar(nuevoTam)
 	}
 
@@ -237,10 +213,9 @@ func (it *iterDiccionario[K, V]) Siguiente() {
 	if !it.HaySiguiente() {
 		panic("El iterador termino de iterar")
 	}
+	it.itLista.Siguiente()
 
-	if it.itLista.HaySiguiente() {
-		it.itLista.Siguiente()
-	} else {
+	if !it.itLista.HaySiguiente() {
 		it.buscarProxPos()
 	}
 }
