@@ -2,7 +2,7 @@ package diccionario
 
 import (
 	"fmt"
-	"hash/fnv" //Una funcion de hash que prove go, si queres fijate en esta pagina. https://pkg.go.dev/hash/fnv#New64a
+	"hash/fnv" //Una funcion de hash que provee go. Referencia: https://pkg.go.dev/hash/fnv#New64a
 	TDALista "tdas/lista"
 )
 
@@ -69,6 +69,8 @@ func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
 	if encontrado {
 		par := it.VerActual()
 		par.valor = valor
+		it.Borrar()
+		it.Insertar(par)
 		return
 	}
 
@@ -85,17 +87,16 @@ func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
 
 func (h *hashAbierto[K, V]) Borrar(clave K) V {
 	it, encontrado := h.buscar(clave)
-	var par parClaveValor[K, V]
 	if !encontrado {
 		panic("La clave no pertenece al diccionario")
-	} else {
-		par = it.Borrar()
 	}
+
+	par := it.Borrar()
 
 	valor := par.valor
 	h.cantidad--
-
-	if float64(h.cantidad/len(h.casillas)) < _FACTOR_CARGA_INF && float64(h.cantidad/len(h.casillas)) > _CAPACIDAD_INICIAL {
+	factorDeCarga := float64(h.cantidad) / float64(len(h.casillas))
+	if factorDeCarga < _FACTOR_CARGA_INF && len(h.casillas) > _CAPACIDAD_INICIAL {
 		nuevoTam := len(h.casillas) / 2
 		h.redimensionar(nuevoTam)
 	}
@@ -108,9 +109,8 @@ func (h *hashAbierto[K, V]) Obtener(clave K) V {
 	var par parClaveValor[K, V]
 	if !encontrado {
 		panic("La clave no pertenece al diccionario")
-	} else {
-		par = it.VerActual()
 	}
+	par = it.VerActual()
 
 	valor := par.valor
 
@@ -205,7 +205,6 @@ func (it *iterDiccionario[K, V]) buscarProxPos() {
 
 }
 
-// indexDe define en que casilla del arreglo de listas enlazadas debe caer el par clave-valor.
 func (h *hashAbierto[K, V]) indexDe(clave K, tamCasillas int) int {
 	hv := h.hashClave(clave)
 	return int(hv % uint64(tamCasillas))
@@ -218,7 +217,6 @@ func (h *hashAbierto[K, V]) hashClave(clave K) uint64 {
 	return hf.Sum64()
 }
 
-// convertirABytes convierte una clave generica a []byte.
 func convertirABytes[K comparable](clave K) []byte {
 	return []byte(fmt.Sprintf("%v", clave))
 }
