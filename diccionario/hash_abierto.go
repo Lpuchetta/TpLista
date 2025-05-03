@@ -9,7 +9,7 @@ import (
 const (
 	_FACTOR_CARGA_SUP  = 1.2
 	_FACTOR_CARGA_INF  = 0.3
-	_CAPACIDAD_INICIAL = 7
+	_CAPACIDAD_INICIAL = 79
 )
 
 type parClaveValor[K comparable, V any] struct {
@@ -36,22 +36,6 @@ func CrearHash[K comparable, V any]() Diccionario[K, V] {
 	return &hashAbierto[K, V]{
 		casillas: casillas,
 		cantidad: 0,
-	}
-}
-
-func CrearIteradorDiccionario[K comparable, V any](h *hashAbierto[K, V]) IterDiccionario[K, V] {
-	posActual := 0
-	for posActual < len(h.casillas) && h.casillas[posActual].EstaVacia() {
-		posActual++
-	}
-	var itLista TDALista.IteradorLista[parClaveValor[K, V]]
-	if posActual < len(h.casillas) {
-		itLista = h.casillas[posActual].Iterador()
-	}
-	return &iterDiccionario[K, V]{
-		hash:      h,
-		itLista:   itLista,
-		posActual: posActual,
 	}
 }
 
@@ -131,7 +115,19 @@ func (h *hashAbierto[K, V]) Iterar(visitar func(K, V) bool) {
 }
 
 func (h *hashAbierto[K, V]) Iterador() IterDiccionario[K, V] {
-	return CrearIteradorDiccionario(h)
+	posActual := 0
+	for posActual < len(h.casillas) && h.casillas[posActual].EstaVacia() {
+		posActual++
+	}
+	var itLista TDALista.IteradorLista[parClaveValor[K, V]]
+	if posActual < len(h.casillas) {
+		itLista = h.casillas[posActual].Iterador()
+	}
+	return &iterDiccionario[K, V]{
+		hash:      h,
+		itLista:   itLista,
+		posActual: posActual,
+	}
 }
 
 func (h *hashAbierto[K, V]) redimensionar(nuevoTam int) {
