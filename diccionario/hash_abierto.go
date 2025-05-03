@@ -77,7 +77,7 @@ func (h *hashAbierto[K, V]) Guardar(clave K, valor V) {
 	h.cantidad++
 
 	if float64(h.cantidad)/float64(len(h.casillas)) > _FACTOR_CARGA_SUP {
-		nuevoTam := len(h.casillas) / 2
+		nuevoTam := len(h.casillas) * 2
 		h.redimensionar(nuevoTam)
 	}
 
