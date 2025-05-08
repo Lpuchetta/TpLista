@@ -114,7 +114,23 @@ func (ab *abb[K,V]) Cantidad() int{
 }
 
 func (ab *abb[K,V]) Guardar(clave K, dato V){
-	
-	return
+	nuevoNodo := crearNodo(clave, dato)
+
+	if ab.raiz == nil{
+		ab.raiz = nuevoNodo
+		ab.cantidad++
+	}
+
+	nodoPadre := &(ab.raiz)
+	for *nodoPadre != nil{
+		if ab.cmp(clave, (*nodoPadre).clave) == 0{
+			(*nodoPadre).dato = dato
+			
+			
+		}
+		nodoPadre = avanzarHacia(nodoPadre, clave, ab.cmp)	
+	}
+	*nodoPadre = nuevoNodo
+	ab.cantidad++
 }
 
