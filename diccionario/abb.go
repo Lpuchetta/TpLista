@@ -51,7 +51,7 @@ func (ab *abb[K, V]) Guardar(clave K, dato V) {
 }
 
 func (ab *abb[K, V]) Iterar(visitar func(K, V) bool) {
-
+	ab.iterar(ab.raiz, visitar)
 }
 
 func (ab *abb[K, V]) IterarRango(desde *K, hasta *K, visitar func(clave K, dato V) bool) {
@@ -110,4 +110,15 @@ func (ab *abb[K, V]) pertenece(nodo *nodoAbb[K, V], clave K) bool {
 		return ab.pertenece(nodo.derecho, clave)
 	}
 	return true
+}
+
+func (ab *abb[K, V]) iterar(nodo *nodoAbb[K, V], visitar func(K, V) bool) {
+	if nodo == nil {
+		return
+	}
+	ab.iterar(nodo.izquierdo, visitar)
+	if !visitar(nodo.clave, nodo.dato) {
+		return
+	}
+	ab.iterar(nodo.derecho, visitar)
 }
