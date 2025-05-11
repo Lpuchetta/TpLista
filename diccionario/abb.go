@@ -32,39 +32,35 @@ func crearNodo[K comparable, V any](clave K, dato V) *nodoAbb[K,V]{
 	}
 }  
 
-func avanzarHacia[K comparable, V any](nodo **nodoAbb[K,V], clave K, cmp func(K, K) int) **nodoAbb[K,V]{
-	if cmp(clave, (*nodo).clave) < 0 {
-		return &((*nodo).izquierdo)
-	}else if cmp(clave, (*nodo).clave) > 0{
-		return &((*nodo).derecho)
-	}
-	return nodo 
-}
-
 func buscarReferencia[K comparable, V any](nodo **nodoAbb[K,V], clave K, cmp func(K,K) int) **nodoAbb[K,V]{
-	for *nodo != nil{
-		if cmp(clave, (*nodo).clave) == 0{
-			return nodo
-		}
-		nodo = avanzarHacia(nodo, clave, cmp)
+	if *nodo == nil || cmp((*nodo).clave, clave) == 0{
+		return nodo
 	}
-	return nodo
+	if cmp((*nodo).clave,clave) > 0{
+		return buscarReferencia(&(*nodo).izquierdo, clave, cmp)
+	}
+	return buscarReferencia(&(*nodo).derecho, clave, cmp)
 }
 
-func buscarMaximoIzq[K comparable, V any](nodo **nodoAbb[K, V]) **nodoAbb[K,V]{
-	for (*nodo).derecho != nil{
-		nodo = (&(*nodo).derecho)
+func buscarMaximoIzq[K comparable, V any](ref **nodoAbb[K, V]) **nodoAbb[K,V]{
+	for (*ref).derecho != nil{
+		ref = &((*ref).derecho)
 	}
-	return nodo
+	return ref
+}
+
+
+func (ab *abb[K,V]) Pertenece(clave K) bool{
+	return *(buscarReferencia(&(ab.raiz), clave, ab.cmp)) != nil
 }
 
 
 func (ab *abb[K,V]) Obtener(clave K) V{
-	nodoPadre := buscarReferencia(&(ab.raiz), clave, ab.cmp)
-	if *nodoPadre == nil{
+	nodo := buscarReferencia(&(ab.raiz), clave, ab.cmp)
+	if *nodo== nil{
 		panic("La clave no pertenece al diccionario")
 	}
-	return (*nodoPadre).dato
+	return (*nodo).dato
 }
 
 
@@ -79,9 +75,9 @@ func (ab *abb[K,V]) Borrar(clave K) V{
 	if nodoABorrar.izquierdo == nil && nodoABorrar.derecho == nil{
 		*nodoPadre = nil
 		ab.cantidad--
-		
 		return nodoABorrar.dato
 	}
+
 	if nodoABorrar.izquierdo == nil || nodoABorrar.derecho == nil{
 		var hijo *nodoAbb[K,V]
 		if nodoABorrar.izquierdo == nil{
@@ -94,17 +90,16 @@ func (ab *abb[K,V]) Borrar(clave K) V{
 		return nodoABorrar.dato
 	}
 	
-	nodoAnterior := buscarMaximoIzq(&(*nodoABorrar).izquierdo)
-	datoADevolver := (*nodoABorrar).dato
-	(*nodoABorrar).clave = (*nodoAnterior).clave
-	(*nodoABorrar).dato = (*nodoAnterior).dato
+	nodoAnteriorRef := buscarMaximoIzq(&nodoABorrar.izquierdo)
+	datoADevolver := nodoABorrar.dato
+	nodoABorrar.clave = (*nodoAnteriorRef).clave
+	nodoABorrar.dato = (*nodoAnteriorRef).dato
 
-	if(*nodoAnterior).izquierdo != nil{
-		*nodoPadre = (*nodoAnterior).izquierdo
+	if(*nodoAnteriorRef).izquierdo != nil{
+		*nodoAnteriorRef = (*nodoAnteriorRef).izquierdo
 	}else{
-		*nodoPadre = nil
+		*nodoAnteriorRef = nil
 	}
-	
 	ab.cantidad--
 	return datoADevolver
 }
@@ -114,23 +109,12 @@ func (ab *abb[K,V]) Cantidad() int{
 }
 
 func (ab *abb[K,V]) Guardar(clave K, dato V){
-	nuevoNodo := crearNodo(clave, dato)
-
-	if ab.raiz == nil{
-		ab.raiz = nuevoNodo
+	nodo := buscarReferencia(&(ab.raiz), clave, ab.cmp)
+	if *nodo == nil{
+		*nodo = crearNodo(clave, dato)
 		ab.cantidad++
+	}else{
+		(*nodo).dato = dato
 	}
-
-	nodoPadre := &(ab.raiz)
-	for *nodoPadre != nil{
-		if ab.cmp(clave, (*nodoPadre).clave) == 0{
-			(*nodoPadre).dato = dato
-			
-			
-		}
-		nodoPadre = avanzarHacia(nodoPadre, clave, ab.cmp)	
-	}
-	*nodoPadre = nuevoNodo
-	ab.cantidad++
+	
 }
-
