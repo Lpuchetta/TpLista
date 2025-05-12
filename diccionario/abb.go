@@ -16,7 +16,6 @@ type abb[K comparable, V any] struct {
 }
 
 type iterABB[K comparable, V any] struct {
-	ab   *abb[K, V]
 	pila TDAPila.Pila[*nodoAbb[K, V]]
 }
 
@@ -66,16 +65,11 @@ func (ab *abb[K, V]) IterarRango(desde *K, hasta *K, visitar func(clave K, dato 
 }
 
 func (ab *abb[K, V]) Iterador() IterDiccionario[K, V] {
-	pila := TDAPila.CrearPilaDinamica[*nodoAbb[K, V]]()
-	nodo := ab.raiz
-	for nodo != nil {
-		pila.Apilar(nodo)
-		nodo = nodo.izquierdo
+	iter := &iterABB[K, V]{
+		pila: TDAPila.CrearPilaDinamica[*nodoAbb[K, V]](),
 	}
-	return &iterABB[K, V]{
-		ab:   ab,
-		pila: pila,
-	}
+	iter.apilarIzquierdos(ab.raiz)
+	return iter
 }
 
 func (ab *abb[K, V]) IteradorRango(desde *K, hasta *K) IterDiccionario[K, V] {
@@ -144,7 +138,7 @@ func (it *iterABB[K, V]) HaySiguiente() bool {
 }
 
 func (it *iterABB[K, V]) VerActual() (K, V) {
-	if it.pila.EstaVacia() {
+	if !it.HaySiguiente() {
 		panic("El iterador termino de iterar")
 	}
 	tope := it.pila.VerTope()
@@ -152,17 +146,16 @@ func (it *iterABB[K, V]) VerActual() (K, V) {
 }
 
 func (it *iterABB[K, V]) Siguiente() {
-	if it.pila.EstaVacia() {
+	if !it.HaySiguiente() {
 		panic("El iterador termino de iterar")
 	}
-
 	nodo := it.pila.Desapilar()
-	if nodo.derecho != nil {
-		it.pila.Apilar(nodo.derecho)
-		hijoIzq := nodo.derecho.izquierdo
-		for hijoIzq != nil {
-			it.pila.Apilar(hijoIzq)
-			hijoIzq = hijoIzq.izquierdo
-		}
+	it.apilarIzquierdos(nodo.derecho)
+}
+
+func (it *iterABB[K, V]) apilarIzquierdos(nodo *nodoAbb[K, V]) {
+	for nodo != nil {
+		it.pila.Apilar(nodo)
+		nodo = nodo.izquierdo
 	}
 }
