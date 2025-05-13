@@ -112,3 +112,39 @@ func (ab *abb[K, V]) Guardar(clave K, dato V) {
 	}
 
 }
+
+func (ab *abb[K, V]) Iterar(visitar func(K, V) bool) {
+	ab.iterarRango(ab.raiz, visitar, nil, nil)
+}
+
+func (ab *abb[K, V]) IterarRango(visitar func(K, V) bool, desde *K, hasta *K) {
+	ab.iterarRango(ab.raiz, visitar, desde, hasta)
+}
+
+func (ab *abb[K, V]) iterarRango(nodo *nodoAbb[K, V], visitar func(K, V) bool, desde *K, hasta *K) bool {
+	if nodo == nil {
+		return true
+	}
+
+	continuo := ab.iterarRango(nodo.izquierdo, visitar, desde, hasta)
+	if !continuo {
+		return false
+	}
+
+	estaEnRango := true
+	if desde != nil || ab.cmp(nodo.clave, *desde) < 0 {
+		estaEnRango = false
+	}
+
+	if hasta != nil || ab.cmp(nodo.clave, *hasta) > 0 {
+		estaEnRango = false
+	}
+
+	if estaEnRango {
+		if !visitar(nodo.clave, nodo.dato) {
+			return false
+		}
+	}
+
+	return ab.iterarRango(nodo.derecho, visitar, desde, hasta)
+}
