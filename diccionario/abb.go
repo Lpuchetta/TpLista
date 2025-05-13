@@ -61,7 +61,7 @@ func (ab *abb[K, V]) Iterar(visitar func(K, V) bool) {
 }
 
 func (ab *abb[K, V]) IterarRango(desde *K, hasta *K, visitar func(clave K, dato V) bool) {
-
+	ab.iterarRango(ab.raiz, desde, hasta, visitar)
 }
 
 func (ab *abb[K, V]) Iterador() IterDiccionario[K, V] {
@@ -123,14 +123,47 @@ func (ab *abb[K, V]) pertenece(nodo *nodoAbb[K, V], clave K) bool {
 }
 
 func (ab *abb[K, V]) iterar(nodo *nodoAbb[K, V], visitar func(K, V) bool) {
+	ab.iterarRango(nodo, nil, nil, visitar)
+}
+
+func (ab *abb[K, V]) iterarRango(nodo *nodoAbb[K, V], desde *K, hasta *K, visitar func(K, V) bool) {
 	if nodo == nil {
 		return
 	}
-	ab.iterar(nodo.izquierdo, visitar)
-	if !visitar(nodo.clave, nodo.dato) {
-		return
+
+	cmpDesde := -1
+	if desde != nil {
+		cmpDesde = ab.cmp(nodo.clave, *desde)
 	}
-	ab.iterar(nodo.derecho, visitar)
+
+	cmpHasta := 1
+	if hasta != nil {
+		cmpHasta = ab.cmp(nodo.clave, *hasta)
+	}
+
+	if desde == nil || cmpDesde >= 0 {
+		ab.iterarRango(nodo.izquierdo, desde, hasta, visitar)
+	}
+
+	enRango := true
+	if desde != nil && cmpDesde < 0 {
+		enRango = false
+	}
+
+	if hasta != nil && cmpHasta > 0 {
+		enRango = false
+	}
+
+	if enRango {
+		if !visitar(nodo.clave, nodo.dato) {
+			return
+		}
+	}
+
+	if hasta == nil || cmpHasta <= 0 {
+		ab.iterarRango(nodo.derecho, desde, hasta, visitar)
+	}
+
 }
 
 func (it *iterABB[K, V]) HaySiguiente() bool {
