@@ -16,7 +16,10 @@ type abb[K comparable, V any] struct {
 }
 
 type iterABB[K comparable, V any] struct {
-	pila TDAPila.Pila[*nodoAbb[K, V]]
+	pila  TDAPila.Pila[*nodoAbb[K, V]]
+	desde *K
+	hasta *K
+	cmp   func(K, K) int
 }
 
 func CrearABB[K comparable, V any](cmp func(K, K) int) DiccionarioOrdenado[K, V] {
@@ -65,15 +68,15 @@ func (ab *abb[K, V]) IterarRango(desde *K, hasta *K, visitar func(clave K, dato 
 }
 
 func (ab *abb[K, V]) Iterador() IterDiccionario[K, V] {
-	iter := &iterABB[K, V]{
-		pila: TDAPila.CrearPilaDinamica[*nodoAbb[K, V]](),
-	}
-	iter.apilarIzquierdos(ab.raiz)
-	return iter
+	return ab.IteradorRango(nil, nil)
 }
 
 func (ab *abb[K, V]) IteradorRango(desde *K, hasta *K) IterDiccionario[K, V] {
-
+	iter := &iterABB[K, V]{
+		pila: TDAPila.CrearPilaDinamica[*nodoAbb[K, V]](),
+	}
+	iter.apilarIzquierdosRango(ab.raiz, desde, hasta, ab.cmp)
+	return iter
 }
 
 func (ab *abb[K, V]) obtener(nodo *nodoAbb[K, V], clave K) V {
@@ -183,12 +186,38 @@ func (it *iterABB[K, V]) Siguiente() {
 		panic("El iterador termino de iterar")
 	}
 	nodo := it.pila.Desapilar()
-	it.apilarIzquierdos(nodo.derecho)
+	it.apilarIzquierdosRango(nodo.derecho, it.desde, it.hasta, it.cmp)
 }
 
-func (it *iterABB[K, V]) apilarIzquierdos(nodo *nodoAbb[K, V]) {
-	for nodo != nil {
-		it.pila.Apilar(nodo)
-		nodo = nodo.izquierdo
+func (it *iterABB[K, V]) apilarIzquierdosRango(
+	nodo *nodoAbb[K, V],
+	desde *K,
+	hasta *K,
+	cmp func(K, K) int,
+) {
+	actual := nodo
+	for actual != nil {
+		cmpDesde := -1
+		if desde != nil {
+			cmpDesde = cmp(actual.clave, *desde)
+		}
+
+		cmpHasta := 1
+		if hasta != nil {
+			cmpHasta = cmp(actual.clave, *hasta)
+		}
+
+		if hasta != nil && cmpHasta > 0 {
+			actual = actual.izquierdo
+			continue
+		}
+
+		if desde != nil && cmpDesde < 0 {
+			actual = actual.derecho
+			continue
+		}
+
+		it.pila.Apilar(actual)
+		actual = actual.izquierdo
 	}
 }
