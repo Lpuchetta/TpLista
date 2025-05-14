@@ -97,13 +97,12 @@ func (ab *abb[K, V]) Borrar(clave K) V {
 
 	predecesorRef := buscarMaximoIzq(&nodoABorrar.izquierdo)
 	claveReemplazo := (*predecesorRef).clave
-	dato = (*predecesorRef).dato
+	nuevoDato := (*predecesorRef).dato
 	ab.Borrar(claveReemplazo)
-
+	
 	nodoABorrar.clave = claveReemplazo
-	nodoABorrar.dato = dato
-	ab.cantidad++
-
+	nodoABorrar.dato = nuevoDato
+	
 	return dato
 }
 
