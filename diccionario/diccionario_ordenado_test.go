@@ -256,6 +256,12 @@ func TestStressDiccionario(t *testing.T) {
 	require.EqualValues(t, 0, dic.Cantidad())
 }
 
+func BenchmarkGuardar(b *testing.B) {
+	dic := TDADiccionarioOrdenado.CrearABB[int, int](compararEnteros)
+	for i := 0; i < b.N; i++ {
+		dic.Guardar(i, i*10)
+	}
+}
 
 
 
