@@ -141,11 +141,11 @@ func (ab *abb[K, V]) iterarRango(nodo *nodoAbb[K, V], desde *K, hasta *K, visita
 	}
 
 	estaEnRango := true
-	if desde != nil || ab.cmp(nodo.clave, *desde) < 0 {
+	if desde != nil && ab.cmp(nodo.clave, *desde) < 0 {
 		estaEnRango = false
 	}
 
-	if hasta != nil || ab.cmp(nodo.clave, *hasta) > 0 {
+	if hasta != nil && ab.cmp(nodo.clave, *hasta) > 0 {
 		estaEnRango = false
 	}
 
