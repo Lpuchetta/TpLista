@@ -1,4 +1,4 @@
-package diccionario
+package diccionario_test
 
 import(
 	"testing"
@@ -17,11 +17,11 @@ func compararEnteros(a,b int) int{
 }
 
 func compararStrings(a, b string) int{
-	return strings.compare(a, b)
+	return strings.Compare(a, b)
 }
 
-func TestDiccionarioVacio(t *testing.T){
-	dicInt := TDADiccionarioOrdenado.CrearAbb(compararEnteros)
+func TestDiccionarioOrdenadoVacio(t *testing.T){
+	dicInt := TDADiccionarioOrdenado.CrearABB[int,int](compararEnteros)
 
 	require.EqualValues(t, 0, dicInt.Cantidad())
 	require.False(t, dicInt.Pertenece(21))
@@ -54,12 +54,12 @@ func TestDiccionarioVacio(t *testing.T){
 }
 
 func TestGuardarYBorrar(t *testing.T){
-	dicStr := TDADiccionarioOrdenado.CrearABB[compararStrings]
+	dicStr := TDADiccionarioOrdenado.CrearABB[string,string](compararStrings)
 
 	require.EqualValues(t, 0, dicStr.Cantidad())
 	require.False(t, dicStr.Pertenece(""))
 	require.PanicsWithValue(t, "La clave no pertenece al diccionario", func(){
-		disStr.Borrar("")
+		dicStr.Borrar("")
 	})
 
 	dicStr.Guardar("A","B")
@@ -85,7 +85,7 @@ func TestGuardarYBorrar(t *testing.T){
 	require.EqualValues(t, "B", dicStr.Obtener("A"))
 	dicStr.Guardar("A", "H")
 
-	require.True(t, dicStr.Pertence("A"))
+	require.True(t, dicStr.Pertenece("A"))
 	require.EqualValues(t, "H", dicStr.Obtener("A"))
 	require.EqualValues(t, 2, dicStr.Cantidad())
 	require.EqualValues(t, "H", dicStr.Borrar("A"))
@@ -120,9 +120,9 @@ func TestGuardarYBorrar(t *testing.T){
 	
 }
 
-func TestVolumen(t *testing.T) {
+func TestVolumenDiccionarioOrdenado(t *testing.T) {
 	const N = 1000
-	dicInt := TDADiccionarioOrdenado.CrearABB(compararEnteros)
+	dicInt := TDADiccionarioOrdenado.CrearABB[int,int](compararEnteros)
 
 	for i := 0; i < N; i++ {
 		dicInt.Guardar(i, i*2)
@@ -157,7 +157,7 @@ func TestVolumen(t *testing.T) {
 
 
 func TestGuardarMismaClave(t *testing.T) {
-	dicInt := TDADiccionarioOrdenado.CrearABB(compararEnteros)
+	dicInt := TDADiccionarioOrdenado.CrearABB[int,int](compararEnteros)
 	const veces = 100
 	clave := 21
 	for i := 0; i < veces; i++ {
