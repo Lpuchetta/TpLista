@@ -5,6 +5,8 @@ import(
 	"github.com/stretchr/testify/require"
 	TDADiccionarioOrdenado "tdas/diccionario"
 	"strings"
+	"math/rand"
+	"time"
 )
 
 func compararEnteros(a,b int) int{
@@ -176,6 +178,82 @@ func TestGuardarMismaClave(t *testing.T) {
 		dicInt.Borrar(clave)
 	})
 	require.EqualValues(t, 0, dicInt.Cantidad())
+}
+
+func TestBorrarNodoConDosHijos(t *testing.T) {
+    dic := TDADiccionarioOrdenado.CrearABB[int,int](compararEnteros)
+    
+    dic.Guardar(15,150)
+    dic.Guardar(10,100)
+    dic.Guardar(20,200)
+    dic.Guardar(5,50)
+    dic.Guardar(12,120)
+
+    
+    valor := dic.Borrar(10)
+    require.EqualValues(t, 100, valor)
+    
+    require.True(t, dic.Pertenece(12))
+    require.False(t, dic.Pertenece(10))
+    require.EqualValues(t, 120, dic.Obtener(12))
+    
+    require.EqualValues(t, 4, dic.Cantidad())
+}
+
+func TestBorrarNodoUnHijoDerecho(t *testing.T) {
+	dic := TDADiccionarioOrdenado.CrearABB[int, string](compararEnteros)
+	dic.Guardar(10, "a")
+	dic.Guardar(20, "b") // hijo derecho
+
+	require.EqualValues(t, "a", dic.Borrar(10))
+	require.True(t, dic.Pertenece(20))
+	require.False(t, dic.Pertenece(10))
+}
+
+func TestBorrarNodoUnHijoIzquierdo(t *testing.T) {
+	dic := TDADiccionarioOrdenado.CrearABB[int, string](compararEnteros)
+	dic.Guardar(20, "a")
+	dic.Guardar(10, "b") // hijo izquierdo
+
+	require.EqualValues(t, "a", dic.Borrar(20))
+	require.True(t, dic.Pertenece(10))
+	require.False(t, dic.Pertenece(20))
+}
+
+
+func TestStressDiccionario(t *testing.T) {
+	const N = 10000
+	dic := TDADiccionarioOrdenado.CrearABB[int, int](compararEnteros)
+
+	rand.Seed(time.Now().UnixNano())
+	claves := rand.Perm(N) // genera una permutación aleatoria de 0 a N-1
+
+	// Guardar claves con valor = clave * 10
+	for _, clave := range claves {
+		dic.Guardar(clave, clave*10)
+	}
+
+	require.EqualValues(t, N, dic.Cantidad())
+
+	// Verificar que todas las claves estén
+	for _, clave := range claves {
+		require.True(t, dic.Pertenece(clave))
+		require.EqualValues(t, clave*10, dic.Obtener(clave))
+	}
+
+	// Borrar todas las claves
+	for _, clave := range claves {
+		require.EqualValues(t, clave*10, dic.Borrar(clave))
+		require.False(t, dic.Pertenece(clave))
+		require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() {
+			dic.Obtener(clave)
+		})
+		require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() {
+			dic.Borrar(clave)
+		})
+	}
+
+	require.EqualValues(t, 0, dic.Cantidad())
 }
 
 
