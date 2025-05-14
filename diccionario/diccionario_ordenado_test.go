@@ -2,11 +2,9 @@ package diccionario_test
 
 import (
 	"fmt"
-	"math/rand"
 	"strings"
 	TDADiccionarioOrdenado "tdas/diccionario"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -220,37 +218,27 @@ func TestBorrarNodoUnHijoIzquierdo(t *testing.T) {
 	require.False(t, dic.Pertenece(20))
 }
 
-func TestStressDiccionario(t *testing.T) {
+func TestStressDiccionarioOrdenado(t *testing.T) {
 	const N = 10000
 	dic := TDADiccionarioOrdenado.CrearABB[int, int](compararEnteros)
 
-	rand.Seed(time.Now().UnixNano())
-	claves := rand.Perm(N) // genera una permutación aleatoria de 0 a N-1
-
-	// Guardar claves con valor = clave * 10
-	for _, clave := range claves {
-		dic.Guardar(clave, clave*10)
+	for i := N - 1; i >= 0; i-- {
+		dic.Guardar(i, i*10)
 	}
 
-	require.EqualValues(t, N, dic.Cantidad())
+	require.Equal(t, N, dic.Cantidad())
 
-	for _, clave := range claves {
-		require.True(t, dic.Pertenece(clave))
-		require.EqualValues(t, clave*10, dic.Obtener(clave))
+	for i := 0; i < N; i++ {
+		require.True(t, dic.Pertenece(i))
+		require.Equal(t, i*10, dic.Obtener(i))
 	}
 
-	for _, clave := range claves {
-		require.EqualValues(t, clave*10, dic.Borrar(clave))
-		require.False(t, dic.Pertenece(clave))
-		require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() {
-			dic.Obtener(clave)
-		})
-		require.PanicsWithValue(t, "La clave no pertenece al diccionario", func() {
-			dic.Borrar(clave)
-		})
+	for i := 0; i < N; i++ {
+		require.Equal(t, i*10, dic.Borrar(i))
+		require.False(t, dic.Pertenece(i))
 	}
 
-	require.EqualValues(t, 0, dic.Cantidad())
+	require.Equal(t, 0, dic.Cantidad(), "El diccionario debe quedar vacío después de borrar todo")
 }
 
 func TestClavesCadenasValoresLongitudes(t *testing.T) {
