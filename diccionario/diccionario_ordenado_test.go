@@ -355,6 +355,217 @@ func TestIteradorCorteInterno(t *testing.T) {
 	require.EqualValues(t, 5, contador)
 }
 
+func TestIteradorInternoSumaParcialElementos(t *testing.T) {
+	dicc := TDADiccionarioOrdenado.CrearABB[int, int](compararEnteros)
+
+	for i := 1; i <= 6; i++ {
+		dicc.Guardar(i, i)
+	}
+
+	suma := 0
+	dicc.Iterar(func(_ int, dato int) bool {
+		if suma <= 10 {
+			suma += dato
+			return true
+		}
+		return false
+	})
+
+	require.Equal(t, 15, suma)
+
+}
+
+func TestIteradorInternoSumarLosPrimerosTresPares(t *testing.T) {
+	dicc := TDADiccionarioOrdenado.CrearABB[int, int](compararEnteros)
+
+	for i := 1; i <= 100; i++ {
+		dicc.Guardar(i, i)
+	}
+
+	suma, cont := 0, 0
+	dicc.Iterar(func(_ int, dato int) bool {
+		if cont == 3 {
+			return false
+		}
+
+		if dato%2 == 0 {
+			suma += dato
+			cont++
+		}
+
+		return true
+	})
+
+	require.Equal(t, 12, suma)
+
+}
+
+func TestIteradorInternoContarImpares(t *testing.T) {
+	dicc := TDADiccionarioOrdenado.CrearABB[int, int](compararEnteros)
+
+	for i := 0; i < 100; i++ {
+		dicc.Guardar(i, i)
+	}
+
+	cont := 0
+	dicc.Iterar(func(_ int, dato int) bool {
+		if dato%2 == 1 {
+			cont++
+		}
+		return true
+	})
+
+	require.Equal(t, 50, cont)
+
+}
+
+func TestIteradorInternoBusquedaElemento(t *testing.T) {
+	dicc := TDADiccionarioOrdenado.CrearABB[int, int](compararEnteros)
+
+	nums := []int{467, 23, 101, 19}
+
+	for i, num := range nums {
+		dicc.Guardar(i, num)
+	}
+
+	elemBuscado := 101
+	pertenece := false
+	dicc.Iterar(func(_ int, dato int) bool {
+		if dato == elemBuscado {
+			pertenece = true
+			return false
+		}
+		return true
+	})
+
+	require.True(t, pertenece)
+}
+
+func TestIteradorInternoConcatenaStrings(t *testing.T) {
+	dicc := TDADiccionarioOrdenado.CrearABB[int, string](compararEnteros)
+
+	dicc.Guardar(1, "Esto es")
+	dicc.Guardar(2, " una ")
+	dicc.Guardar(3, "prueba sobre el ")
+	dicc.Guardar(4, "iterador inter")
+	dicc.Guardar(5, "no :)")
+
+	var texto string
+	dicc.Iterar(func(_ int, s string) bool {
+		texto += s
+		return true
+	})
+	require.Equal(t, "Esto es una prueba sobre el iterador interno :)", texto)
+}
+
+func TestIteradorInternoProductoDeTodosLosElementos(t *testing.T) {
+	dicc := TDADiccionarioOrdenado.CrearABB[int, int](compararEnteros)
+
+	for i := 1; i <= 10; i++ {
+		dicc.Guardar(i, i)
+	}
+
+	prod := 1
+	dicc.Iterar(func(_ int, dato int) bool {
+		prod *= dato
+		return true
+	})
+
+	require.Equal(t, 3628800, prod)
+
+}
+
+func TestIteradorInternoExisteAlgunElementoQueCumpleCondicion(t *testing.T) {
+	dicc := TDADiccionarioOrdenado.CrearABB[int, int](compararEnteros)
+
+	for i, num := range []int{23, 57, 19, 41, 467, 101} {
+		dicc.Guardar(i, num)
+	}
+
+	esPar := func(dato int) bool {
+		return dato%2 == 0
+	}
+
+	existe := false
+	dicc.Iterar(func(_ int, dato int) bool {
+		if esPar(dato) {
+			existe = true
+			return false
+		}
+		return true
+	})
+
+	require.False(t, existe)
+
+}
+
+func TestIteradorInternoDevuelveIndiceDeElemento(t *testing.T) {
+	dicc := TDADiccionarioOrdenado.CrearABB[int, int](compararEnteros)
+
+	for i, num := range []int{23, 57, 19, 41, 467, 24, 101} {
+		dicc.Guardar(i, num)
+	}
+
+	esPar := func(dato int) bool {
+		return dato%2 == 0
+	}
+
+	indiceDelElemPar := -1
+	dicc.Iterar(func(indice int, dato int) bool {
+		if esPar(dato) {
+			indiceDelElemPar = indice
+			return false
+		}
+		indice++
+		return true
+	})
+
+	require.Equal(t, 5, indiceDelElemPar)
+
+}
+
+func TestIteradorInternoFiltrarPares(t *testing.T) {
+	dicc := TDADiccionarioOrdenado.CrearABB[int, int](compararEnteros)
+
+	for i, num := range []int{23, 57, 22, 41, 467, 24, 101, 38} {
+		dicc.Guardar(i, num)
+	}
+
+	esPar := func(dato int) bool {
+		return dato%2 == 0
+	}
+
+	pares := make([]int, 0)
+	dicc.Iterar(func(indice int, dato int) bool {
+		if esPar(dato) {
+			pares = append(pares, dato)
+		}
+		return true
+	})
+
+	require.Equal(t, []int{22, 24, 38}, pares)
+
+}
+
+func TestIteradorInternoSumarPares(t *testing.T) {
+	dicc := TDADiccionarioOrdenado.CrearABB[int, int](compararEnteros)
+
+	for i := 1; i <= 6; i++ {
+		dicc.Guardar(i, i)
+	}
+
+	suma := 0
+	dicc.Iterar(func(_ int, dato int) bool {
+		if dato%2 == 0 {
+			suma += dato
+		}
+		return true
+	})
+
+	require.Equal(t, 12, suma)
+
+}
+
 func TestIteradorUnicoElemento(t *testing.T) {
 	dic := TDADiccionarioOrdenado.CrearABB[string, int](compararStrings)
 	dic.Guardar("Pucherito de gallina...", 100)
