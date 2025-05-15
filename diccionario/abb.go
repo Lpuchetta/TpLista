@@ -99,13 +99,12 @@ func (ab *abb[K, V]) Borrar(clave K) V {
 	claveReemplazo := (*predecesorRef).clave
 	nuevoDato := (*predecesorRef).dato
 	ab.Borrar(claveReemplazo)
-	
+
 	nodoABorrar.clave = claveReemplazo
 	nodoABorrar.dato = nuevoDato
-	
+
 	return dato
 }
-
 
 func (ab *abb[K, V]) Cantidad() int {
 	return ab.cantidad

@@ -10,6 +10,6 @@ type DiccionarioOrdenado[K comparable, V any] interface {
 	IteradorRango(desde *K, hasta *K) IterDiccionario[K, V]
 }
 
-type IterDiccionarioOrdenado[K comparable, V any] interface{
-	IterDiccionario[K,V]
+type IterDiccionarioOrdenado[K comparable, V any] interface {
+	IterDiccionario[K, V]
 }

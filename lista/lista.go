@@ -34,14 +34,13 @@ type Lista[T any] interface {
 	Iterador() IteradorLista[T]
 }
 
-type  IteradorLista[T any] interface {
+type IteradorLista[T any] interface {
 
 	// VerActual devuelve el elemento actual sobre el que está parado el iterador.
 	// Si el iterador ya recorrió toda la lista, lanza un panic: "El iterador termino de iterar".
 	VerActual() T
 
-	
-    // HaySiguiente devuelve true si quedan elementos por recorrer.
+	// HaySiguiente devuelve true si quedan elementos por recorrer.
 	HaySiguiente() bool
 
 	// Siguiente avanza una posición en la lista.
