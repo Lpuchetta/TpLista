@@ -20,7 +20,12 @@ func CrearHeap[T any](funcion_cmp func(T, T) int) ColaPrioridad[T] {
 }
 
 func CrearHeapArr[T any](arreglo []T, funcion_cmp func(T, T) int) ColaPrioridad[T] {
-	return nil
+	heapify(arreglo, funcion_cmp)
+	return &colaConPrioridad[T]{
+		datos: arreglo,
+		cant:  len(arreglo),
+		cmp:   funcion_cmp,
+	}
 }
 
 func (cola *colaConPrioridad[T]) EstaVacia() bool {
@@ -32,7 +37,7 @@ func (cola *colaConPrioridad[T]) Encolar(dato T) {
 		cola.redimensionar(len(cola.datos) * _FACTOR_REDIMENSION)
 	}
 	cola.datos[cola.cant] = dato
-	cola.upHeap(cola.cant)
+	upHeap(cola.datos, cola.cant, cola.cmp)
 	cola.cant++
 
 }
@@ -55,18 +60,18 @@ func (cola *colaConPrioridad[T]) Cantidad() int {
 	return cola.cant
 }
 
-func (cola *colaConPrioridad[T]) upHeap(pos int) {
+func upHeap[T any](arr []T, pos int, cmp func(T, T) int) {
 	if pos == 0 {
 		return
 	}
 
 	posPadre := posicionPadre(pos)
-	padre := cola.datos[posPadre]
-	hijo := cola.datos[pos]
+	padre := arr[posPadre]
+	hijo := arr[pos]
 
-	if cola.cmp(padre, hijo) > 0 {
-		swap(cola.datos, posPadre, pos)
-		cola.upHeap(posPadre)
+	if cmp(padre, hijo) > 0 {
+		swap(arr, posPadre, pos)
+		upHeap(arr, posPadre, cmp)
 	}
 }
 
@@ -77,8 +82,14 @@ func (cola *colaConPrioridad[T]) upHeap(pos int) {
 //     2.a) Calcular la pos de ambos hijos.
 //     2.b) Se pregunta si se cumple la condición de heap. Si se cumple, termina; caso contrario,
 //     se realiza el swap entre el padre e hijo mayor y se repite el paso 2.
-func downHeap() {
+func downHeap[T any](arr []T, pos int, cmp func(T, T) int) {
 
+}
+
+func heapify[T any](arr []T, cmp func(T, T) int) {
+	for i := len(arr) - 1; i >= 0; i-- {
+		downHeap(arr, i, cmp)
+	}
 }
 
 func posicionPadre(posHijo int) int {
