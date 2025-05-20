@@ -65,12 +65,9 @@ func upHeap[T any](arr []T, pos int, cmp func(T, T) int) {
 		return
 	}
 
-	posPadre := posicionPadre(pos)
-	padre := arr[posPadre]
-	hijo := arr[pos]
-
-	if cmp(padre, hijo) > 0 {
-		swap(arr, posPadre, pos)
+	posPadre := (pos - 1) / 2
+	if cmp(arr[posPadre], arr[pos]) < 0 {
+		arr[posPadre], arr[pos] = arr[pos], arr[posPadre]
 		upHeap(arr, posPadre, cmp)
 	}
 }
@@ -87,29 +84,13 @@ func downHeap[T any](arr []T, pos int, cmp func(T, T) int) {
 }
 
 func heapify[T any](arr []T, cmp func(T, T) int) {
-	for i := len(arr) - 1; i >= 0; i-- {
+	for i := len(arr)/2 - 1; i >= 0; i-- {
 		downHeap(arr, i, cmp)
 	}
-}
-
-func posicionPadre(posHijo int) int {
-	return (posHijo - 1) / 2
-}
-
-func posicionHijoIzq(posPadre int) int {
-	return 2*posPadre + 1
-}
-
-func posicioHijoDer(posPadre int) int {
-	return 2*posPadre + 2
 }
 
 func (cola *colaConPrioridad[T]) redimensionar(nuevoTam int) {
 	nuevos := make([]T, nuevoTam)
 	copy(nuevos, cola.datos)
 	cola.datos = nuevos
-}
-
-func swap[T any](arr []T, pos, otra int) {
-	arr[pos], arr[otra] = arr[otra], arr[pos]
 }
