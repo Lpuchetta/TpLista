@@ -89,11 +89,11 @@ func downHeap[T any](arr []T, tam int, pos int, cmp func(T, T) int) {
 	posDer := 2*pos + 2
 	posMayor := pos
 
-	if posIzq < len(arr) && cmp(arr[posIzq], arr[posMayor]) > 0 {
+	if posIzq < tam && cmp(arr[posIzq], arr[posMayor]) > 0 {
 		posMayor = posIzq
 	}
 
-	if posDer < len(arr) && cmp(arr[posDer], arr[posMayor]) > 0 {
+	if posDer < tam && cmp(arr[posDer], arr[posMayor]) > 0 {
 		posMayor = posDer
 	}
 
