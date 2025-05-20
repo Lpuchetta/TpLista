@@ -1,7 +1,7 @@
 package cola_prioridad
 
 const (
-	_CAPACIDAD_INICIAL  = 5
+	_CAPACIDAD_INICIAL  = 23
 	_FACTOR_REDIMENSION = 2
 )
 
@@ -53,7 +53,15 @@ func (cola *colaConPrioridad[T]) Desencolar() T {
 	if cola.EstaVacia() {
 		panic("La cola esta vacia")
 	}
-	// TODO: Completar
+	max := cola.datos[0]
+	cola.cant--
+	cola.datos[0] = cola.datos[cola.cant]
+	downHeap(cola.datos, cola.cant, 0, cola.cmp)
+
+	if cola.cant > _CAPACIDAD_INICIAL && cola.cant < len(cola.datos)/4 {
+		cola.redimensionar(len(cola.datos) / _FACTOR_REDIMENSION)
+	}
+	return max
 }
 
 func (cola *colaConPrioridad[T]) Cantidad() int {
@@ -66,31 +74,55 @@ func upHeap[T any](arr []T, pos int, cmp func(T, T) int) {
 	}
 
 	posPadre := (pos - 1) / 2
-	if cmp(arr[posPadre], arr[pos]) < 0 {
+	if cmp(arr[pos], arr[posPadre]) > 0 {
 		arr[posPadre], arr[pos] = arr[pos], arr[posPadre]
 		upHeap(arr, posPadre, cmp)
 	}
 }
 
-// TODO: Completar
-// IDEA:
-//  1. Se elimina al primero del arreglo y se considera al último como el primero.
-//  2. Llamo a downHeap para ese elemento.
-//     2.a) Calcular la pos de ambos hijos.
-//     2.b) Se pregunta si se cumple la condición de heap. Si se cumple, termina; caso contrario,
-//     se realiza el swap entre el padre e hijo mayor y se repite el paso 2.
-func downHeap[T any](arr []T, pos int, cmp func(T, T) int) {
+func downHeap[T any](arr []T, tam int, pos int, cmp func(T, T) int) {
+	if pos == tam {
+		return
+	}
+
+	posIzq := 2*pos + 1
+	posDer := 2*pos + 2
+	posMayor := pos
+
+	if posIzq < len(arr) && cmp(arr[posIzq], arr[posMayor]) > 0 {
+		posMayor = posIzq
+	}
+
+	if posDer < len(arr) && cmp(arr[posDer], arr[posMayor]) > 0 {
+		posMayor = posDer
+	}
+
+	if posMayor != pos {
+		arr[pos], arr[posMayor] = arr[posMayor], arr[pos]
+		downHeap(arr, tam, posMayor, cmp)
+	}
 
 }
 
 func heapify[T any](arr []T, cmp func(T, T) int) {
 	for i := len(arr)/2 - 1; i >= 0; i-- {
-		downHeap(arr, i, cmp)
+		downHeap(arr, len(arr), i, cmp)
 	}
 }
 
 func (cola *colaConPrioridad[T]) redimensionar(nuevoTam int) {
 	nuevos := make([]T, nuevoTam)
-	copy(nuevos, cola.datos)
+	copy(nuevos, cola.datos[:cola.cant])
 	cola.datos = nuevos
+}
+
+func posMinimo[T any](arr []T, cmp func(T, T) int, a, b, c int) int {
+	pos := a
+	if cmp(arr[b], arr[pos]) < 0 {
+		pos = b
+	}
+	if cmp(arr[c], arr[pos]) < 0 {
+		pos = c
+	}
+	return pos
 }
