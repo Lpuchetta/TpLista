@@ -116,13 +116,10 @@ func (cola *colaConPrioridad[T]) redimensionar(nuevoTam int) {
 	cola.datos = nuevos
 }
 
-func posMinimo[T any](arr []T, cmp func(T, T) int, a, b, c int) int {
-	pos := a
-	if cmp(arr[b], arr[pos]) < 0 {
-		pos = b
+func HeapSort[T any](elementos []T, funcion_cmp func(T, T) int) {
+	heapify(elementos, funcion_cmp)
+	for i := len(elementos) - 1; i > 0; i-- {
+		elementos[0], elementos[i] = elementos[i], elementos[0]
+		downHeap(elementos, i, 0, funcion_cmp)
 	}
-	if cmp(arr[c], arr[pos]) < 0 {
-		pos = c
-	}
-	return pos
 }
