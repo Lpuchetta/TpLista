@@ -1,3 +1,4 @@
+// Heap de mínimopackage diccionario
 package diccionario
 
 import TDAPila "tdas/pila"
@@ -69,42 +70,50 @@ func (ab *abb[K, V]) Obtener(clave K) V {
 }
 
 func (ab *abb[K, V]) Borrar(clave K) V {
-	ref := buscarReferencia(&ab.raiz, clave, ab.cmp)
-	if *ref == nil {
-		panic("La clave no pertenece al diccionario")
-	}
+    ref := buscarReferencia(&ab.raiz, clave, ab.cmp)
+    if *ref == nil {
+        panic("La clave no pertenece al diccionario")
+    }
 
-	nodoABorrar := *ref
-	dato := nodoABorrar.dato
+    nodo := *ref
+    datoOriginal := nodo.dato
 
-	if nodoABorrar.izquierdo == nil && nodoABorrar.derecho == nil {
-		*ref = nil
-		ab.cantidad--
-		return dato
-	}
+    // 1) Caso hoja
+    if nodo.izquierdo == nil && nodo.derecho == nil {
+        *ref = nil
+        ab.cantidad--
+        return datoOriginal
+    }
 
-	if nodoABorrar.izquierdo == nil || nodoABorrar.derecho == nil {
-		var hijo *nodoAbb[K, V]
-		if nodoABorrar.izquierdo == nil {
-			hijo = nodoABorrar.derecho
-		} else {
-			hijo = nodoABorrar.izquierdo
-		}
-		*ref = hijo
-		ab.cantidad--
-		return dato
-	}
+    // 2) Un único hijo
+    if nodo.izquierdo == nil || nodo.derecho == nil {
+        var hijo *nodoAbb[K, V]
+        if nodo.izquierdo == nil {
+            hijo = nodo.derecho
+        } else {
+            hijo = nodo.izquierdo
+        }
+        *ref = hijo
+        ab.cantidad--
+        return datoOriginal
+    }
 
-	predecesorRef := buscarMaximoIzq(&nodoABorrar.izquierdo)
-	claveReemplazo := (*predecesorRef).clave
-	nuevoDato := (*predecesorRef).dato
-	ab.Borrar(claveReemplazo)
+    // 3) Dos hijos: reemplazo por predecesor
+    preRef := buscarMaximoIzq(&nodo.izquierdo)
+    claveReemplazo := (*preRef).clave
+    datoReemplazo := (*preRef).dato
 
-	nodoABorrar.clave = claveReemplazo
-	nodoABorrar.dato = nuevoDato
+    // Borro recursivamente el predecesor (ya decrementa ab.cantidad)
+    ab.Borrar(claveReemplazo)
 
-	return dato
+    // Sustituyo clave y dato en el nodo original
+    nodo.clave = claveReemplazo
+    nodo.dato = datoReemplazo
+
+    // Devuelvo el dato del nodo “borrado”
+    return datoOriginal
 }
+
 
 func (ab *abb[K, V]) Cantidad() int {
 	return ab.cantidad
